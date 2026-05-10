@@ -1,0 +1,156 @@
+{% extends 'core/base.html' %}
+
+{% block title %}QR Labels{% endblock %}
+{% block header %}QR Label Printing{% endblock %}
+{% block breadcrumb_current %}QR Labels{% endblock %}
+
+{% block content %}
+<style>
+    .label-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+
+    .qr-label-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 14px;
+    }
+
+    .qr-label {
+        min-height: 270px;
+        padding: 16px;
+        border: 1px dashed rgba(100, 116, 139, 0.45);
+        border-radius: 8px;
+        background: #ffffff;
+        display: grid;
+        justify-items: center;
+        align-content: start;
+        text-align: center;
+        gap: 8px;
+        break-inside: avoid;
+    }
+
+    .qr-label img {
+        width: 140px;
+        height: 140px;
+        image-rendering: pixelated;
+    }
+
+    .qr-label h3 {
+        font-size: 16px;
+        line-height: 1.25;
+        color: #10213d;
+        margin: 0;
+    }
+
+    .qr-label-code {
+        font-size: 12px;
+        font-weight: 900;
+        color: #1d4ed8;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .qr-label-url {
+        max-width: 100%;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.35;
+        word-break: break-all;
+    }
+
+    @media print {
+        .sidebar,
+        .sidebar-rail,
+        .topbar,
+        .breadcrumbs,
+        .mobile-tabs,
+        .page-header,
+        .label-toolbar,
+        .filter-form {
+            display: none !important;
+        }
+
+        .main {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        .qr-label-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8mm;
+        }
+
+        .qr-label {
+            box-shadow: none;
+            border: 1px dashed #94a3b8;
+            min-height: 64mm;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <div>
+        <h2><svg class="icon"><use href="#icon-receipt"></use></svg> Print QR Labels</h2>
+        <div class="page-subtext">Print scan-ready labels that open each item’s public live status page.</div>
+    </div>
+    <div>
+        <a href="{% url 'item_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-box"></use></svg>Back to Items</a>
+        <button type="button" class="btn" onclick="window.print()"><svg class="icon"><use href="#icon-receipt"></use></svg>Print Labels</button>
+    </div>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="form-group">
+        <label for="search">Search Labels</label>
+        <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Code, name, or category">
+    </div>
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select name="status" id="status">
+            <option value="">All</option>
+            <option value="Available" {% if selected_status == 'Available' %}selected{% endif %}>Available</option>
+            <option value="Borrowed" {% if selected_status == 'Borrowed' %}selected{% endif %}>Borrowed</option>
+            <option value="Maintenance" {% if selected_status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="category">Category</label>
+        <select name="category" id="category">
+            <option value="">All categories</option>
+            {% for category in categories %}
+                <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Filter</button>
+        <a href="{% url 'item_qr_labels' %}" class="btn btn-secondary" style="margin-left: 8px;">Clear</a>
+    </div>
+</form>
+
+<div class="label-toolbar">
+    <div class="muted">{{ label_total }} label{{ label_total|pluralize }} ready. The page limits printing to 120 items at a time.</div>
+</div>
+
+<section class="qr-label-grid" aria-label="Printable QR labels">
+    {% for label in label_items %}
+        <article class="qr-label">
+            <img src="{{ label.qr_data_uri }}" alt="QR code for {{ label.item.item_name }}">
+            <div class="qr-label-code">{{ label.item.item_code }}</div>
+            <h3>{{ label.item.item_name }}</h3>
+            <div class="muted">{{ label.item.category }}</div>
+            <div class="qr-label-url">{{ label.public_url }}</div>
+        </article>
+    {% empty %}
+        <div class="empty-state">No items matched the label filters.</div>
+    {% endfor %}
+</section>
+{% endblock %}

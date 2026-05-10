@@ -1,0 +1,61 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Borrower Form{% endblock %}
+{% block header %}Borrower Form{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Add / Edit Student Record</h2>
+        <div class="page-subtext">Enter student borrower details below.</div>
+    </div>
+</div>
+
+<div class="form-container">
+    <form method="POST">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="id_full_name">Full Name</label>
+                {{ form.full_name }}
+                {{ form.full_name.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_school_id">School ID</label>
+                {{ form.school_id }}
+                {{ form.school_id.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email</label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_program">Program</label>
+                {{ form.program }}
+                {{ form.program.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_section">Section</label>
+                {{ form.section }}
+                {{ form.section.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_active_status">Active Status</label>
+                {{ form.active_status }}
+                {{ form.active_status.errors }}
+            </div>
+        </div>
+
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-users"></use></svg>Save Borrower</button>
+    </form>
+</div>
+{% endblock %}

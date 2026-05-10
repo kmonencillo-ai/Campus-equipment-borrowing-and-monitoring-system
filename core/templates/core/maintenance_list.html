@@ -1,0 +1,60 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Maintenance{% endblock %}
+{% block header %}Maintenance History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Maintenance Records</h2>
+        <div class="page-subtext">Track equipment issues, repairs, and damage follow-up.</div>
+    </div>
+    <a href="{% url 'item_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-box"></use></svg>Back to Items</a>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="form-group">
+        <label for="search">Search Maintenance</label>
+        <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Item, code, notes, or reported by">
+    </div>
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Search</button>
+    </div>
+</form>
+
+<div class="table-container">
+    <div class="table-meta">
+        <div class="muted">{{ maintenance_total }} maintenance record{{ maintenance_total|pluralize }} found</div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Item</th>
+                <th scope="col">Status Change</th>
+                <th scope="col">Notes</th>
+                <th scope="col">Reported By</th>
+                <th scope="col">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in maintenance_records %}
+            <tr>
+                <td>{{ record.item.item_name }} ({{ record.item.item_code }})</td>
+                <td>{{ record.previous_status }} -> {{ record.new_status }}</td>
+                <td>{{ record.notes }}</td>
+                <td>{{ record.reported_by.get_full_name|default:record.reported_by.username|default:"System" }}</td>
+                <td>{{ record.created_at }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">No maintenance records yet. Items moved into maintenance will appear here automatically.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=maintenance_records querystring=querystring %}
+</div>
+{% endblock %}

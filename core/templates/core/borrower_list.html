@@ -1,0 +1,99 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Borrowers{% endblock %}
+{% block header %}Borrowers Management{% endblock %}
+{% block breadcrumb_current %}Borrowers{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Student Borrowers</h2>
+        <div class="page-subtext">Manage student information for borrowing transactions.</div>
+    </div>
+    <div>
+        <a href="{% url 'borrower_archive_list' %}" class="btn btn-archive"><svg class="icon"><use href="#icon-archive"></use></svg>View Archived Students</a>
+        {% if can_manage_records %}
+            <a href="{% url 'borrower_create' %}" class="btn" style="margin-left: 10px;"><svg class="icon"><use href="#icon-plus"></use></svg>Add Student</a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="filter-chip-row" aria-label="Borrower status filters">
+        <a class="filter-chip {% if not selected_status %}active{% endif %}" href="{% url 'borrower_list' %}{% if search_query %}?search={{ search_query|urlencode }}{% endif %}">All</a>
+        <a class="filter-chip {% if selected_status == 'active' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}status=active">Active</a>
+        <a class="filter-chip {% if selected_status == 'has_active' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}status=has_active">Has Active Borrows</a>
+        <a class="filter-chip {% if selected_status == 'overdue' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}status=overdue">Overdue</a>
+        <a class="filter-chip {% if selected_status == 'inactive' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}status=inactive">Inactive</a>
+    </div>
+
+    <div class="form-group">
+        <label for="search">Search Students</label>
+        <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Name, school ID, program, or section">
+    </div>
+    <input type="hidden" name="status" value="{{ selected_status }}">
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Search</button>
+        <a href="{% url 'borrower_list' %}" class="btn btn-secondary" style="margin-left: 8px;">Clear</a>
+    </div>
+</form>
+
+<div class="table-container">
+    <div class="table-meta">
+        <div class="muted">{{ borrower_total }} student{{ borrower_total|pluralize }} found</div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Full Name</th>
+                <th scope="col">School ID</th>
+                <th scope="col">Program</th>
+                <th scope="col">Section</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for borrower in borrowers %}
+            <tr class="{% if borrower.overdue_borrow_count %}overdue-row{% endif %}">
+                <td>
+                    <div class="identity-cell">
+                        <span class="avatar-initials" aria-hidden="true">{{ borrower.full_name|slice:":2"|upper }}</span>
+                        <a href="{% url 'borrower_detail' borrower.pk %}">{{ borrower.full_name }}</a>
+                    </div>
+                </td>
+                <td>{{ borrower.school_id }}</td>
+                <td>{{ borrower.program|default:"-" }}</td>
+                <td>{{ borrower.section|default:"-" }}</td>
+                <td>
+                    {% if borrower.overdue_borrow_count %}
+                        <span class="status-badge status-overdue">Has Overdue</span>
+                    {% elif borrower.active_borrow_count %}
+                        <span class="status-badge status-borrowed">Has Active Borrows</span>
+                    {% elif borrower.active_status %}
+                        <span class="status-badge status-active">No Active Borrows</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                    {% endif %}
+                </td>
+                <td class="actions">
+                    <a href="{% url 'borrower_detail' borrower.pk %}"><svg class="icon"><use href="#icon-eye"></use></svg>View</a>
+                    {% if can_manage_records %}
+                        <a href="{% url 'borrower_edit' borrower.pk %}"><svg class="icon"><use href="#icon-edit"></use></svg>Edit</a>
+                        <a href="{% url 'borrower_delete' borrower.pk %}"><svg class="icon"><use href="#icon-archive"></use></svg>Archive</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">No student records matched your search. Try a broader keyword or add a new student.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=borrowers querystring=querystring %}
+</div>
+{% endblock %}

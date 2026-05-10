@@ -1,0 +1,230 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block header %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>{{ page_title }}</h2>
+        <div class="page-subtext">Configure system behavior, review administrative health, and keep launch settings visible.</div>
+    </div>
+</div>
+
+<div class="settings-layout">
+    <nav class="settings-nav" aria-label="Settings sections">
+        <a href="#general">General</a>
+        <a href="#users">Users &amp; Roles</a>
+        <a href="#notifications">Notifications</a>
+        <a href="#data">Data</a>
+        <a href="#database">Database</a>
+        <a href="#backups">Backups</a>
+        <a href="#appearance">Appearance</a>
+        <a href="#security">Security</a>
+    </nav>
+
+    <div>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <section class="panel settings-section" id="general">
+                <h3>General Settings</h3>
+                <div class="page-subtext">School identity, borrowing rules, reminder timing, and item category suggestions.</div>
+
+                <div class="form-grid" style="margin-top: 18px;">
+                    <div class="form-group">
+                        <label for="id_school_name">School Name</label>
+                        {{ form.school_name }}
+                        {{ form.school_name.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_school_logo_url">School Logo URL</label>
+                        {{ form.school_logo_url }}
+                        {{ form.school_logo_url.errors }}
+                        <div class="form-help">Optional image URL used in the login page and sidebar branding.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_borrow_limit">Borrow Limit</label>
+                        {{ form.borrow_limit }}
+                        {{ form.borrow_limit.errors }}
+                        <div class="form-help">Maximum active borrows allowed per borrower.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_overdue_grace_period_days">Overdue Grace Period (Days)</label>
+                        {{ form.overdue_grace_period_days }}
+                        {{ form.overdue_grace_period_days.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_reminder_days_before_due">Reminder Days Before Due</label>
+                        {{ form.reminder_days_before_due }}
+                        {{ form.reminder_days_before_due.errors }}
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="id_item_categories">Suggested Item Categories</label>
+                        {{ form.item_categories }}
+                        {{ form.item_categories.errors }}
+                        <div class="form-help">Enter a comma-separated list. Example: AV, Lab, Sports, Tools.</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn"><svg class="icon"><use href="#icon-settings"></use></svg>Save Settings</button>
+            </section>
+        </form>
+
+        <section class="panel settings-section" id="users">
+            <h3>Users &amp; Roles</h3>
+            <div class="page-subtext">Account counts and quick access to role management.</div>
+            <div class="metric-list">
+                <div class="metric-row"><span>Total Users</span><strong>{{ user_total }}</strong></div>
+                <div class="metric-row"><span>Active Users</span><strong>{{ active_user_total }}</strong></div>
+                <div class="metric-row"><span>Inactive Users</span><strong>{{ inactive_user_total }}</strong></div>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'user_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-users"></use></svg>Manage Users</a>
+                <a href="{% url 'register' %}" class="btn"><svg class="icon"><use href="#icon-plus"></use></svg>Add User</a>
+            </div>
+        </section>
+
+        <section class="panel settings-section" id="notifications">
+            <h3>Notifications</h3>
+            <div class="page-subtext">Current notification logging health across email and Telegram channels.</div>
+            <div class="metric-list">
+                <div class="metric-row"><span>Total Notification Logs</span><strong>{{ notification_total }}</strong></div>
+                <div class="metric-row"><span>Failed Notifications</span><strong>{{ failed_notification_total }}</strong></div>
+                <div class="metric-row"><span>Skipped Notifications</span><strong>{{ skipped_notification_total }}</strong></div>
+                <div class="metric-row"><span>Due Today Queue</span><strong>{{ notification_readiness.due_today_count }}</strong></div>
+                <div class="metric-row"><span>Overdue Queue</span><strong>{{ notification_readiness.overdue_count }}</strong></div>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'notification_list' %}" class="btn"><svg class="icon"><use href="#icon-alert"></use></svg>Open Notification Center</a>
+                <a href="{% url 'profile' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-user"></use></svg>My Preferences</a>
+            </div>
+        </section>
+
+        <section class="panel settings-section" id="data">
+            <h3>Data</h3>
+            <div class="page-subtext">Operational totals used for backup, retention, and launch readiness checks.</div>
+            <div class="metric-list">
+                <div class="metric-row"><span>Active Borrowers</span><strong>{{ data_totals.borrowers }}</strong></div>
+                <div class="metric-row"><span>Active Items</span><strong>{{ data_totals.items }}</strong></div>
+                <div class="metric-row"><span>Transactions</span><strong>{{ data_totals.transactions }}</strong></div>
+                <div class="metric-row"><span>Audit Logs</span><strong>{{ data_totals.activity_logs }}</strong></div>
+            </div>
+            <div class="quick-actions">
+                <a href="{% url 'report_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-chart"></use></svg>Open Reports</a>
+                <a href="{% url 'activity_log_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-activity"></use></svg>Open Audit Logs</a>
+            </div>
+        </section>
+
+        <section class="panel settings-section" id="database">
+            <h3>Database Status</h3>
+            <div class="page-subtext">Live database readiness without exposing passwords or connection strings.</div>
+            <div class="metric-list">
+                <div class="metric-row">
+                    <span>Provider</span>
+                    <strong>{{ database_readiness.provider }}</strong>
+                </div>
+                <div class="metric-row">
+                    <span>Connection</span>
+                    <strong>{{ database_readiness.status }}</strong>
+                </div>
+                <div class="metric-row">
+                    <span>Engine</span>
+                    <strong>{{ database_readiness.engine }}</strong>
+                </div>
+                <div class="metric-row">
+                    <span>Host</span>
+                    <strong>{{ database_readiness.host }}</strong>
+                </div>
+                <div class="metric-row">
+                    <span>Database</span>
+                    <strong>{{ database_readiness.name }}</strong>
+                </div>
+                <div class="metric-row">
+                    <span>SSL Mode</span>
+                    <strong>{{ database_readiness.sslmode|default:"local" }}</strong>
+                </div>
+            </div>
+            <div class="list-row" style="margin-top: 16px;">
+                <div>
+                    <strong>Launch check</strong>
+                    <div class="muted">Use Supabase with SSL for shared demos and backups before deleting records.</div>
+                </div>
+                <span class="status-badge {% if database_readiness.status == 'Connected' %}status-available{% else %}status-overdue{% endif %}">
+                    {{ database_readiness.status }}
+                </span>
+            </div>
+        </section>
+
+        <section class="panel settings-section" id="backups">
+            <h3>Backup &amp; Restore</h3>
+            <div class="page-subtext">Create a JSON backup before demos, imports, bulk cleanup, or deployment changes.</div>
+            <div class="metric-list">
+                <div class="metric-row"><span>Backup Folder</span><strong>{{ database_readiness.backup_dir }}</strong></div>
+                <div class="metric-row"><span>Recent Backups</span><strong>{{ recent_backups|length }}</strong></div>
+                <div class="metric-row"><span>LAN Hosts Enabled</span><strong>{% if database_readiness.lan_hosts_enabled %}Yes{% else %}No{% endif %}</strong></div>
+                <div class="metric-row"><span>Debug Mode</span><strong>{% if database_readiness.debug %}On{% else %}Off{% endif %}</strong></div>
+            </div>
+
+            <form method="POST" action="{% url 'create_system_backup' %}" class="quick-actions">
+                {% csrf_token %}
+                <button type="submit" class="btn"><svg class="icon"><use href="#icon-archive"></use></svg>Create JSON Backup</button>
+                <a href="{% url 'report_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-chart"></use></svg>Export Reports</a>
+            </form>
+
+            <div class="list-stack" style="margin-top: 16px;">
+                {% for backup in recent_backups %}
+                    <div class="list-row">
+                        <div>
+                            <strong>{{ backup.name }}</strong>
+                            <div class="muted">
+                                {{ backup.created_at }} | {{ backup.size_kb }} KB
+                                {% if backup.manifest_name %}| Manifest: {{ backup.manifest_name }}{% endif %}
+                            </div>
+                        </div>
+                        <span class="status-badge status-info">Ready</span>
+                    </div>
+                {% empty %}
+                    <div class="empty-state">No backups have been created yet. Create one before your next demo or data cleanup.</div>
+                {% endfor %}
+            </div>
+
+            <div class="list-row" style="margin-top: 16px;">
+                <div>
+                    <strong>Restore checklist</strong>
+                    <div class="muted">Stop the server, keep the newest backup file, run migrations, then restore with Django loaddata from a verified JSON backup.</div>
+                </div>
+                <span class="status-badge status-info">Documented</span>
+            </div>
+        </section>
+
+        <section class="panel settings-section" id="appearance">
+            <h3>Appearance</h3>
+            <div class="page-subtext">Brand preview using the current saved school name and logo.</div>
+            <div class="list-row" style="margin-top: 16px;">
+                <div>
+                    <strong>{{ system_settings.school_name }}</strong>
+                    <div class="muted">{{ system_settings.school_logo_url|default:"Default local logo is currently used." }}</div>
+                </div>
+                <span class="status-badge status-info">Configured</span>
+            </div>
+        </section>
+
+        <section class="panel settings-section" id="security">
+            <h3>Security</h3>
+            <div class="page-subtext">Runtime security controls currently loaded from settings and environment variables.</div>
+            <div class="metric-list">
+                <div class="metric-row"><span>Session Timeout</span><strong>{{ session_timeout_minutes }} min</strong></div>
+                <div class="metric-row"><span>Login Attempt Limit</span><strong>{{ login_attempt_limit }}</strong></div>
+                <div class="metric-row"><span>Cookie SameSite</span><strong>{{ session_cookie_samesite }}</strong></div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

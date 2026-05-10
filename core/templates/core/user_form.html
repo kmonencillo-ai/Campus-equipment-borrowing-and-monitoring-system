@@ -1,0 +1,120 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block header %}{{ page_title }}{% endblock %}
+{% block breadcrumb_current %}Edit User{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2><svg class="icon"><use href="#icon-user"></use></svg> {{ page_title }}</h2>
+        <div class="page-subtext">Update account information and access level.</div>
+    </div>
+</div>
+
+{% if edited_user %}
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-user"></use></svg></div>
+        <div class="label">Username</div>
+        <div class="value" style="font-size: 22px;">{{ edited_user.username }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-settings"></use></svg></div>
+        <div class="label">Current Role</div>
+        <div style="margin-top: 8px;">
+            <span class="status-badge {% if edited_user.profile.role == 'Admin' %}status-admin{% else %}status-staff{% endif %}">{{ edited_user.profile.role }}</span>
+        </div>
+    </div>
+    <div class="summary-card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-alert"></use></svg></div>
+        <div class="label">Account Status</div>
+        <div style="margin-top: 8px;">
+            {% if edited_user.is_active %}
+                <span class="status-badge status-active">Active</span>
+            {% else %}
+                <span class="status-badge status-inactive">Inactive</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="form-container">
+    <form method="POST">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="id_first_name">First Name</label>
+                {{ form.first_name }}
+                {{ form.first_name.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_last_name">Last Name</label>
+                {{ form.last_name }}
+                {{ form.last_name.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_username">Username</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email</label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_role">Role</label>
+                {{ form.role }}
+                {{ form.role.errors }}
+                <div class="form-help">Admin has full settings, users, audit, and report access. Staff can manage operational borrowing workflows.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_is_active">Active Status</label>
+                {{ form.is_active }}
+                {{ form.is_active.errors }}
+            </div>
+        </div>
+
+        <div class="form-group full">
+            <label>Notification Preferences</label>
+            <div class="preference-grid">
+                <label class="preference-option" for="id_notify_by_email">
+                    {{ form.notify_by_email }}
+                    <span>
+                        <span class="preference-title">Email Notifications</span>
+                        <span class="preference-copy">Include this user in staff/admin overdue email alerts.</span>
+                    </span>
+                </label>
+
+                <label class="preference-option" for="id_notify_by_telegram">
+                    {{ form.notify_by_telegram }}
+                    <span>
+                        <span class="preference-title">Telegram Notifications</span>
+                        <span class="preference-copy">Allow Telegram alerts when this user processes borrow and return records.</span>
+                    </span>
+                </label>
+            </div>
+            {{ form.notify_by_email.errors }}
+            {{ form.notify_by_telegram.errors }}
+        </div>
+
+        <div class="form-action-bar">
+            <a href="{% url 'user_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-users"></use></svg>Cancel</a>
+            {% if edited_user %}
+                <a href="{% url 'user_reset_password' edited_user.pk %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-settings"></use></svg>Reset Password</a>
+            {% endif %}
+            <button type="submit" class="btn"><svg class="icon"><use href="#icon-user"></use></svg>{{ submit_label }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

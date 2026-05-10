@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Archived Items{% endblock %}
+{% block header %}Archived Items{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Archived Items</h2>
+        <div class="page-subtext">Review archived equipment records and restore them to the active inventory.</div>
+    </div>
+    <a href="{% url 'item_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-box"></use></svg>Back to Active Items</a>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="form-group">
+        <label for="search">Search Archived Items</label>
+        <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Code, name, category, or description">
+    </div>
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Search</button>
+    </div>
+</form>
+
+<div class="table-container">
+    <div class="table-meta">
+        <div class="muted">{{ item_total }} archived item{{ item_total|pluralize }} found</div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Item Code</th>
+                <th scope="col">Item Name</th>
+                <th scope="col">Category</th>
+                <th scope="col">Status</th>
+                <th scope="col">Archived At</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.item_code }}</td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.category }}</td>
+                <td>
+                    {% if item.status == 'Available' %}
+                        <span class="status-badge status-available">Available</span>
+                    {% elif item.status == 'Borrowed' %}
+                        <span class="status-badge status-borrowed">Borrowed</span>
+                    {% else %}
+                        <span class="status-badge status-maintenance">Maintenance</span>
+                    {% endif %}
+                </td>
+                <td>{{ item.archived_at|default:"-" }}</td>
+                <td class="actions">
+                    <form method="POST" action="{% url 'item_restore' item.pk %}" class="inline-form">
+                        {% csrf_token %}
+                        <button type="submit" class="link-button" aria-label="Restore item {{ item.item_name }}">Restore</button>
+                    </form>
+                    <form method="POST" action="{% url 'item_purge' item.pk %}" class="inline-form" data-confirm="Permanently delete {{ item.item_name }} and all related transactions or maintenance records? This cannot be undone.">
+                        {% csrf_token %}
+                        <button type="submit" class="link-button" aria-label="Permanently delete item {{ item.item_name }}">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">No archived items found.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=items querystring=querystring %}
+</div>
+{% endblock %}

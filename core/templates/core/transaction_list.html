@@ -1,0 +1,93 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Transactions{% endblock %}
+{% block header %}Transactions{% endblock %}
+{% block breadcrumb_current %}Transactions{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Transaction History</h2>
+        <div class="page-subtext">View all borrowing and return records, including condition notes.</div>
+    </div>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="form-group">
+        <label for="search">Search Transactions</label>
+        <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Borrower, school ID, item, code, or notes">
+    </div>
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select name="status" id="status">
+            <option value="">All</option>
+            <option value="Borrowed" {% if selected_status == 'Borrowed' %}selected{% endif %}>Borrowed</option>
+            <option value="Returned" {% if selected_status == 'Returned' %}selected{% endif %}>Returned</option>
+            <option value="Overdue" {% if selected_status == 'Overdue' %}selected{% endif %}>Overdue</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Filter</button>
+    </div>
+</form>
+
+<div class="table-container">
+    <div class="table-meta">
+        <div class="muted">{{ transaction_total }} transaction{{ transaction_total|pluralize }} found</div>
+    </div>
+    <table>
+        <thead>
+            <tr class="{% if t.status == 'Overdue' %}overdue-row{% endif %}">
+                <th scope="col">Borrower</th>
+                <th scope="col">Item</th>
+                <th scope="col">Status</th>
+                <th scope="col">Borrowed Condition</th>
+                <th scope="col">Returned Condition</th>
+                <th scope="col">Borrow Time</th>
+                <th scope="col">Due Time</th>
+                <th scope="col">Return Time</th>
+                <th scope="col">Notes</th>
+                <th scope="col">Receipt</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in transactions %}
+            <tr>
+                <td>{{ t.borrower.full_name }}</td>
+                <td>{{ t.item.item_name }}</td>
+                <td>
+                    {% if t.status == 'Borrowed' %}
+                        <span class="status-badge status-borrowed">{{ t.status }}</span>
+                    {% elif t.status == 'Returned' %}
+                        <span class="status-badge status-returned">{{ t.status }}</span>
+                    {% else %}
+                        <span class="status-badge status-overdue">{{ t.status }}</span>
+                    {% endif %}
+                </td>
+                <td><span class="status-badge status-{{ t.borrowed_condition|lower }}">{{ t.borrowed_condition }}</span></td>
+                <td>
+                    {% if t.returned_condition %}
+                        <span class="status-badge status-{{ t.returned_condition|lower }}">{{ t.returned_condition }}</span>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ t.borrow_time }}</td>
+                <td>{{ t.due_time }}</td>
+                <td>{{ t.return_time|default:"-" }}</td>
+                <td>{{ t.notes|default:"-" }}</td>
+                <td><a href="{% url 'transaction_receipt' t.pk %}" class="btn btn-secondary" aria-label="View receipt for transaction {{ t.pk }}"><svg class="icon"><use href="#icon-receipt"></use></svg>Receipt</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10">
+                    <div class="empty-state">No transactions matched your filters. Borrow an item to start building transaction history.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=transactions querystring=querystring %}
+</div>
+{% endblock %}

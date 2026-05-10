@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{{ item.item_name }} Availability</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #eef2f9;
+            --surface: #ffffff;
+            --text: #10213d;
+            --muted: #617289;
+            --primary: #1d4ed8;
+            --border: rgba(121, 144, 182, 0.18);
+            --shadow: 0 4px 24px rgba(15, 31, 61, 0.07);
+        }
+        body {
+            min-height: 100vh;
+            font-family: "Segoe UI Variable", "Trebuchet MS", "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+        :focus-visible { outline: 3px solid rgba(29, 78, 216, 0.72); outline-offset: 3px; }
+        .public-header { background: #ffffff; border-bottom: 1px solid var(--border); }
+        .public-header-inner, .public-main { width: min(980px, calc(100% - 32px)); margin: 0 auto; }
+        .public-header-inner { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .brand img { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
+        .brand strong { display: block; font-size: 16px; }
+        .brand span { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+        .btn {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), #2a79ff);
+            color: #ffffff;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn-secondary { background: #f0f4fa; color: #334155; border: 1px solid var(--border); }
+        .public-main { padding: 34px 0 44px; }
+        .item-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: clamp(22px, 4vw, 34px);
+        }
+        .eyebrow { color: var(--primary); font-size: 12px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+        h1 { font-size: clamp(30px, 5vw, 48px); line-height: 1.05; margin-bottom: 12px; }
+        .muted { color: var(--muted); line-height: 1.6; }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 900;
+            margin-bottom: 18px;
+        }
+        .status-available { background: #dcfce7; color: #166534; }
+        .status-borrowed { background: #ffedd5; color: #9a3412; }
+        .status-maintenance { background: #e0e7ff; color: #3730a3; }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-top: 24px;
+        }
+        .detail-card {
+            background: #f8fbff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+        }
+        .detail-card span {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .qr-note {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 14px;
+            background: #eff6ff;
+            border: 1px solid rgba(37, 99, 235, 0.16);
+            color: #1e3a8a;
+            line-height: 1.55;
+        }
+        @media (max-width: 720px) {
+            .public-header-inner { align-items: flex-start; flex-direction: column; padding: 16px 0; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header class="public-header">
+        <div class="public-header-inner">
+            <div class="brand">
+                <img src="{% if system_settings.school_logo_url %}{{ system_settings.school_logo_url }}{% else %}{% static 'core/images/sidebar-brand-logo.png' %}{% endif %}" alt="{{ system_settings.school_name }}">
+                <div>
+                    <strong>{{ system_settings.school_name }}</strong>
+                    <span>Equipment public status</span>
+                </div>
+            </div>
+            <a href="{% url 'public_item_availability' %}" class="btn btn-secondary">All Equipment</a>
+        </div>
+    </header>
+
+    <main class="public-main">
+        <section class="item-panel">
+            <span class="status-badge {% if item.status == 'Available' %}status-available{% elif item.status == 'Borrowed' %}status-borrowed{% else %}status-maintenance{% endif %}">
+                {{ item.status }}
+            </span>
+            <div class="eyebrow">Equipment Status</div>
+            <h1>{{ item.item_name }}</h1>
+            <p class="muted">{{ item.description|default:"No public description is available for this equipment." }}</p>
+
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <span>Item Code</span>
+                    <strong>{{ item.item_code }}</strong>
+                </div>
+                <div class="detail-card">
+                    <span>Category</span>
+                    <strong>{{ item.category|default:"Uncategorized" }}</strong>
+                </div>
+                <div class="detail-card">
+                    <span>Borrowing Status</span>
+                    {% if active_transaction %}
+                        <strong>Checked out{% if active_transaction.status == 'Overdue' %} and overdue{% endif %}</strong>
+                    {% else %}
+                        <strong>Ready for staff-assisted borrowing</strong>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="qr-note">
+                This page is QR-ready. Staff can copy this page URL into a QR label so students can scan the item and see its live public status.
+            </div>
+        </section>
+    </main>
+</body>
+</html>

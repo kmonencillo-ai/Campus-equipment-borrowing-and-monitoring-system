@@ -1,0 +1,66 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Return Item{% endblock %}
+{% block header %}Return Item{% endblock %}
+{% block breadcrumb_current %}Process Return{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2><svg class="icon"><use href="#icon-return"></use></svg> Return {{ transaction.item.item_name }}</h2>
+        <div class="page-subtext">Capture the final condition and any return notes before completing the transaction.</div>
+    </div>
+</div>
+
+<div class="form-container">
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="panel-subtext" style="margin-bottom: 18px;">
+            Confirm the item and borrower before completing the return. Damaged returns require notes and automatically create a maintenance record.
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Borrower</label>
+                <input type="text" value="{{ transaction.borrower.full_name }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>Item</label>
+                <input type="text" value="{{ transaction.item.item_name }} ({{ transaction.item.item_code }})" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>Due Time</label>
+                <input type="text" value="{{ transaction.due_time }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>Borrowed Condition</label>
+                <input type="text" value="{{ transaction.borrowed_condition }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label for="id_returned_condition">Returned Condition</label>
+                {{ form.returned_condition }}
+                {{ form.returned_condition.errors }}
+                <div class="form-help">If marked as damaged, the item will automatically move to maintenance.</div>
+            </div>
+
+            <div class="form-group full">
+                <label for="id_notes">Return Notes</label>
+                {{ form.notes }}
+                {{ form.notes.errors }}
+                <div class="form-help">Required when returned condition is Damaged. Include visible issues, missing parts, or repair instructions.</div>
+            </div>
+        </div>
+
+        <div class="form-action-bar">
+            <a href="{% url 'return_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-list"></use></svg>Cancel</a>
+            <button type="submit" class="btn" data-loading-label="Completing return..."><svg class="icon"><use href="#icon-receipt"></use></svg>Complete Return &amp; Generate Receipt</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

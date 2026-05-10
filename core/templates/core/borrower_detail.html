@@ -1,0 +1,142 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Borrower Profile{% endblock %}
+{% block header %}Borrower Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>{{ borrower.full_name }}</h2>
+        <div class="page-subtext">Review borrower information, active status, and full borrowing history.</div>
+    </div>
+    <div>
+        <button type="button" class="btn btn-secondary" onclick="window.print()"><svg class="icon"><use href="#icon-receipt"></use></svg>Print History</button>
+        <a href="{% url 'borrower_list' %}" class="btn" style="background: #64748b;"><svg class="icon"><use href="#icon-users"></use></svg>Back to Students</a>
+    </div>
+</div>
+
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="label">School ID</div>
+        <div class="value" style="font-size: 24px;">{{ borrower.school_id }}</div>
+        <div class="line blue"></div>
+    </div>
+    <div class="summary-card">
+        <div class="label">Active Borrows</div>
+        <div class="value">{{ active_count }}</div>
+        <div class="line orange"></div>
+    </div>
+    <div class="summary-card">
+        <div class="label">Returned Records</div>
+        <div class="value">{{ returned_count }}</div>
+        <div class="line green"></div>
+    </div>
+    <div class="summary-card">
+        <div class="label">Overdue Records</div>
+        <div class="value">{{ overdue_count }}</div>
+        <div class="line red"></div>
+    </div>
+</div>
+
+<div class="panel" style="margin-bottom: 24px;">
+    <h3>Borrower Information</h3>
+    <div class="page-subtext">Current borrower record details used for transaction processing.</div>
+    <div class="list-stack" style="margin-top: 18px;">
+        <div class="list-row">
+            <div>
+                <strong>Program</strong>
+                <div class="muted">{{ borrower.program|default:"Not provided" }}</div>
+            </div>
+            <div>
+                <strong>Email</strong>
+                <div class="muted">{{ borrower.email|default:"Not provided" }}</div>
+            </div>
+            <div>
+                <strong>Section</strong>
+                <div class="muted">{{ borrower.section|default:"Not provided" }}</div>
+            </div>
+            <div>
+                <strong>Status</strong>
+                <div class="muted">
+                    {% if borrower.active_status %}
+                        <span class="status-badge status-active">Active</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="form-group">
+        <label for="status">Filter History</label>
+        <select name="status" id="status">
+            <option value="">All</option>
+            <option value="Borrowed" {% if selected_status == 'Borrowed' %}selected{% endif %}>Borrowed</option>
+            <option value="Returned" {% if selected_status == 'Returned' %}selected{% endif %}>Returned</option>
+            <option value="Overdue" {% if selected_status == 'Overdue' %}selected{% endif %}>Overdue</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Apply</button>
+    </div>
+</form>
+
+<div class="table-container">
+    <div class="table-meta">
+        <div class="muted">{{ transaction_total }} transaction{{ transaction_total|pluralize }} found</div>
+    </div>
+    <table>
+        <thead>
+            <tr class="{% if transaction.status == 'Overdue' %}overdue-row{% endif %}">
+                <th scope="col">Item</th>
+                <th scope="col">Status</th>
+                <th scope="col">Borrowed Condition</th>
+                <th scope="col">Returned Condition</th>
+                <th scope="col">Borrow Time</th>
+                <th scope="col">Due Time</th>
+                <th scope="col">Return Time</th>
+                <th scope="col">Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.item.item_name }}</td>
+                <td>
+                    {% if transaction.status == 'Borrowed' %}
+                        <span class="status-badge status-borrowed">{{ transaction.status }}</span>
+                    {% elif transaction.status == 'Returned' %}
+                        <span class="status-badge status-returned">{{ transaction.status }}</span>
+                    {% else %}
+                        <span class="status-badge status-overdue">{{ transaction.status }}</span>
+                    {% endif %}
+                </td>
+                <td><span class="status-badge status-{{ transaction.borrowed_condition|lower }}">{{ transaction.borrowed_condition }}</span></td>
+                <td>
+                    {% if transaction.returned_condition %}
+                        <span class="status-badge status-{{ transaction.returned_condition|lower }}">{{ transaction.returned_condition }}</span>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ transaction.borrow_time }}</td>
+                <td>{{ transaction.due_time|default:"-" }}</td>
+                <td>{{ transaction.return_time|default:"-" }}</td>
+                <td>{{ transaction.notes|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">
+                    <div class="empty-state">This borrower has no transaction history yet.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=transactions querystring=querystring %}
+</div>
+{% endblock %}

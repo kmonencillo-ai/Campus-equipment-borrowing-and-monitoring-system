@@ -1,0 +1,140 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Users{% endblock %}
+{% block header %}User Management{% endblock %}
+{% block breadcrumb_current %}Users{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2><svg class="icon"><use href="#icon-users"></use></svg> System Users</h2>
+        <div class="page-subtext">Create and manage staff and admin accounts inside the system.</div>
+    </div>
+    <a href="{% url 'register' %}" class="btn"><svg class="icon"><use href="#icon-plus"></use></svg>Add User</a>
+</div>
+
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-users"></use></svg></div>
+        <div class="label">Active Users</div>
+        <div class="value">{{ active_user_total }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-alert"></use></svg></div>
+        <div class="label">Inactive Users</div>
+        <div class="value">{{ inactive_user_total }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-settings"></use></svg></div>
+        <div class="label">Active Admins</div>
+        <div class="value">{{ admin_user_total }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-user"></use></svg></div>
+        <div class="label">Active Staff</div>
+        <div class="value">{{ staff_user_total }}</div>
+    </div>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="filter-chip-row" aria-label="User filters">
+        <a class="filter-chip {% if not selected_role and not selected_status %}active{% endif %}" href="{% url 'user_list' %}{% if search_query %}?search={{ search_query|urlencode }}{% endif %}">All</a>
+        <a class="filter-chip {% if selected_role == 'Admin' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}role=Admin{% if selected_status %}&status={{ selected_status }}{% endif %}">Admins</a>
+        <a class="filter-chip {% if selected_role == 'Staff' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}role=Staff{% if selected_status %}&status={{ selected_status }}{% endif %}">Staff</a>
+        <a class="filter-chip {% if selected_status == 'active' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}{% if selected_role %}role={{ selected_role }}&{% endif %}status=active">Active</a>
+        <a class="filter-chip {% if selected_status == 'inactive' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}{% if selected_role %}role={{ selected_role }}&{% endif %}status=inactive">Inactive</a>
+    </div>
+    <div class="form-group">
+        <label for="search">Search Users</label>
+        <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Name, username, or email">
+    </div>
+    <div class="form-group">
+        <label for="role">Role</label>
+        <select name="role" id="role">
+            <option value="">All roles</option>
+            <option value="Admin" {% if selected_role == 'Admin' %}selected{% endif %}>Admin</option>
+            <option value="Staff" {% if selected_role == 'Staff' %}selected{% endif %}>Staff</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select name="status" id="status">
+            <option value="">All statuses</option>
+            <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
+            <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Inactive</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Filter</button>
+        <a href="{% url 'user_list' %}" class="btn btn-secondary" style="margin-left: 8px;">Clear</a>
+    </div>
+</form>
+
+<div class="table-container">
+    <div class="table-meta">
+        <div class="muted">{{ user_total }} user{{ user_total|pluralize }} found</div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Username</th>
+                <th scope="col">Email</th>
+                <th scope="col">Role</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_obj in users %}
+            <tr>
+                <td>
+                    <div class="identity-cell">
+                        <span class="avatar-initials" aria-hidden="true">{{ user_obj.username|slice:":2"|upper }}</span>
+                        <span>{{ user_obj.get_full_name|default:user_obj.username }}</span>
+                    </div>
+                </td>
+                <td>{{ user_obj.username }}</td>
+                <td>{{ user_obj.email }}</td>
+                <td>
+                    <span class="status-badge {% if user_obj.profile.role == 'Admin' %}status-admin{% else %}status-staff{% endif %}">
+                        {{ user_obj.profile.role }}
+                    </span>
+                </td>
+                <td>
+                    {% if user_obj.is_active %}
+                        <span class="status-badge status-active">Active</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                    {% endif %}
+                </td>
+                <td class="actions">
+                    <a href="{% url 'user_edit' user_obj.pk %}" aria-label="Edit user {{ user_obj.username }}"><svg class="icon"><use href="#icon-edit"></use></svg>Edit</a>
+                    <a href="{% url 'user_reset_password' user_obj.pk %}" aria-label="Reset password for {{ user_obj.username }}"><svg class="icon"><use href="#icon-settings"></use></svg>Reset Password</a>
+                    {% if user_obj != request.user %}
+                        <form method="POST" action="{% url 'user_toggle_status' user_obj.pk %}" class="inline-form" data-confirm="{% if user_obj.is_active %}Deactivate{% else %}Activate{% endif %} account {{ user_obj.username }}?">
+                            {% csrf_token %}
+                            <button type="submit" class="link-button" aria-label="{% if user_obj.is_active %}Deactivate{% else %}Activate{% endif %} user {{ user_obj.username }}">
+                                {% if user_obj.is_active %}
+                                    <svg class="icon"><use href="#icon-alert"></use></svg>Deactivate
+                                {% else %}
+                                    <svg class="icon"><use href="#icon-plus"></use></svg>Activate
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">No users found.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=users querystring=querystring %}
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Return Items{% endblock %}
+{% block header %}Return Items{% endblock %}
+{% block breadcrumb_current %}Returns{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2><svg class="icon"><use href="#icon-return"></use></svg> Borrowed Items</h2>
+        <div class="page-subtext">Process item returns from active transactions.</div>
+    </div>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="filter-chip-row" aria-label="Return status filters">
+        <a class="filter-chip {% if not selected_status %}active{% endif %}" href="{% url 'return_list' %}{% if search_query %}?search={{ search_query|urlencode }}{% endif %}">All Active</a>
+        <a class="filter-chip {% if selected_status == 'Borrowed' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}status=Borrowed">Borrowed</a>
+        <a class="filter-chip {% if selected_status == 'Overdue' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}status=Overdue">Overdue</a>
+    </div>
+    <div class="form-group">
+        <label for="search">Quick Return Lookup</label>
+        <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Borrower name, ID, transaction item, or item code">
+    </div>
+    <input type="hidden" name="status" value="{{ selected_status }}">
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Find Active Borrows</button>
+        <a href="{% url 'return_list' %}" class="btn btn-secondary" style="margin-left: 8px;">Clear</a>
+    </div>
+</form>
+
+<div class="table-container">
+    <div class="table-meta">
+        <div class="muted">{{ borrowed_total }} active borrowing record{{ borrowed_total|pluralize }}</div>
+    </div>
+    <table>
+        <thead>
+            <tr class="{% if transaction.status == 'Overdue' %}overdue-row{% endif %}">
+                <th scope="col">Borrower</th>
+                <th scope="col">Item</th>
+                <th scope="col">Status</th>
+                <th scope="col">Borrow Time</th>
+                <th scope="col">Due Time</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in borrowed_transactions %}
+            <tr class="{% if transaction.status == 'Overdue' %}overdue-row{% endif %}">
+                <td>{{ transaction.borrower.full_name }}</td>
+                <td>{{ transaction.item.item_name }}</td>
+                <td>
+                    {% if transaction.status == 'Overdue' %}
+                        <span class="status-badge status-overdue">{{ transaction.status }}</span>
+                    {% else %}
+                        <span class="status-badge status-borrowed">{{ transaction.status }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ transaction.borrow_time }}</td>
+                <td>
+                    {{ transaction.due_time }}
+                    {% if transaction.days_overdue %}
+                        <div class="muted">+{{ transaction.days_overdue }} day{{ transaction.days_overdue|pluralize }} overdue</div>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'return_item' transaction.pk %}" class="btn btn-danger" aria-label="Process return for {{ transaction.item.item_name }} borrowed by {{ transaction.borrower.full_name }}">
+                        <svg class="icon"><use href="#icon-return"></use></svg>Return
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">No borrowed items found.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=borrowed_transactions querystring=querystring %}
+</div>
+{% endblock %}

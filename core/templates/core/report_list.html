@@ -1,0 +1,198 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Reports{% endblock %}
+{% block header %}Reports{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Transaction Reports</h2>
+        <div class="page-subtext">Filter transactions, review overdue records, and inspect inventory status by category.</div>
+    </div>
+    <div>
+        <a href="?{% if export_querystring %}{{ export_querystring }}&{% endif %}export=csv" class="btn" data-loading-label="Preparing CSV"><svg class="icon"><use href="#icon-receipt"></use></svg>Export CSV</a>
+        <a href="?{% if export_querystring %}{{ export_querystring }}&{% endif %}export=pdf" class="btn" style="margin-left: 10px;" data-loading-label="Preparing PDF"><svg class="icon"><use href="#icon-receipt"></use></svg>Export PDF</a>
+        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="window.print()"><svg class="icon"><use href="#icon-receipt"></use></svg>Print</button>
+    </div>
+</div>
+
+<div class="print-header">
+    <h2>{{ system_settings.school_name }}</h2>
+    <div class="muted">Reports generated from filtered campus equipment records.</div>
+</div>
+
+<nav class="section-nav" aria-label="Report types">
+    {% for tab in report_tabs %}
+        <a class="section-tab {% if tab.active %}active{% endif %}" href="?type={{ tab.key }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_borrower %}&borrower={{ selected_borrower }}{% endif %}{% if selected_item %}&item={{ selected_item }}{% endif %}{% if selected_date_from %}&date_from={{ selected_date_from }}{% endif %}{% if selected_date_to %}&date_to={{ selected_date_to }}{% endif %}">
+            {{ tab.label }}
+        </a>
+    {% endfor %}
+</nav>
+
+<form method="GET" class="filter-form">
+    <input type="hidden" name="type" value="{{ report_type }}">
+
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select name="status" id="status">
+            <option value="">All</option>
+            <option value="Borrowed" {% if selected_status == 'Borrowed' %}selected{% endif %}>Borrowed</option>
+            <option value="Returned" {% if selected_status == 'Returned' %}selected{% endif %}>Returned</option>
+            <option value="Overdue" {% if selected_status == 'Overdue' %}selected{% endif %}>Overdue</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="borrower">Borrower</label>
+        <select name="borrower" id="borrower">
+            <option value="">All</option>
+            {% for borrower in borrowers %}
+                <option value="{{ borrower.id }}" {% if selected_borrower == borrower.id|stringformat:"s" %}selected{% endif %}>
+                    {{ borrower.full_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="item">Item</label>
+        <select name="item" id="item">
+            <option value="">All</option>
+            {% for item in items %}
+                <option value="{{ item.id }}" {% if selected_item == item.id|stringformat:"s" %}selected{% endif %}>
+                    {{ item.item_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="date_from">Date From</label>
+        <input type="date" name="date_from" id="date_from" value="{{ selected_date_from }}">
+    </div>
+
+    <div class="form-group">
+        <label for="date_to">Date To</label>
+        <input type="date" name="date_to" id="date_to" value="{{ selected_date_to }}">
+    </div>
+
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Filter</button>
+    </div>
+</form>
+
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="label">Total Records</div>
+        <div class="value">{{ summary.total_records }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="label">Borrowed</div>
+        <div class="value">{{ summary.borrowed_count }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="label">Returned</div>
+        <div class="value">{{ summary.returned_count }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="label">Overdue</div>
+        <div class="value">{{ summary.overdue_count }}</div>
+    </div>
+</div>
+
+{% if report_type == 'inventory' %}
+<div class="table-container" style="margin-bottom: 24px;">
+    <div class="table-meta">
+        <div>
+            <strong>Inventory Summary</strong>
+            <div class="muted">Current active item counts grouped by category and status.</div>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Category</th>
+                <th scope="col">Total</th>
+                <th scope="col">Available</th>
+                <th scope="col">Borrowed</th>
+                <th scope="col">Maintenance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in inventory_summary %}
+            <tr>
+                <td>{{ row.category }}</td>
+                <td>{{ row.total }}</td>
+                <td><span class="status-badge status-available">{{ row.available }}</span></td>
+                <td><span class="status-badge status-borrowed">{{ row.borrowed }}</span></td>
+                <td><span class="status-badge status-maintenance">{{ row.maintenance }}</span></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">No active inventory records are available yet.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="table-container">
+    <div class="table-meta">
+        <div>
+            <strong>{% if report_type == 'overdue' %}Overdue Records{% else %}Transaction Records{% endif %}</strong>
+            <div class="muted">{{ transaction_total }} record{{ transaction_total|pluralize }} matched</div>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Borrower</th>
+                <th scope="col">Item</th>
+                <th scope="col">Status</th>
+                <th scope="col">Borrow Time</th>
+                <th scope="col">Due Time</th>
+                <th scope="col">Return Time</th>
+                <th scope="col">Days Overdue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in transactions %}
+            <tr class="{% if t.status == 'Overdue' %}overdue-row{% endif %}">
+                <td>{{ t.borrower.full_name }}</td>
+                <td>{{ t.item.item_name }}</td>
+                <td>
+                    {% if t.status == 'Borrowed' %}
+                        <span class="status-badge status-borrowed">{{ t.status }}</span>
+                    {% elif t.status == 'Returned' %}
+                        <span class="status-badge status-returned">{{ t.status }}</span>
+                    {% else %}
+                        <span class="status-badge status-overdue">{{ t.status }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ t.borrow_time }}</td>
+                <td>{{ t.due_time }}</td>
+                <td>{{ t.return_time|default:"-" }}</td>
+                <td>
+                    {% if t.days_overdue %}
+                        <strong class="status-badge status-overdue">+{{ t.days_overdue }}</strong>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">No records matched the current report filters.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=transactions querystring=querystring %}
+</div>
+{% endblock %}

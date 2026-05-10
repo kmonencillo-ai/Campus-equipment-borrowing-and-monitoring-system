@@ -1,0 +1,120 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Items{% endblock %}
+{% block header %}Items Management{% endblock %}
+{% block breadcrumb_current %}Equipment{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Items List</h2>
+        <div class="page-subtext">Manage equipment and campus resource records.</div>
+    </div>
+    <div>
+        <a href="{% url 'item_archive_list' %}" class="btn btn-archive"><svg class="icon"><use href="#icon-archive"></use></svg>View Archived Items</a>
+        <a href="{% url 'item_qr_labels' %}" class="btn btn-secondary" style="margin-left: 10px;"><svg class="icon"><use href="#icon-receipt"></use></svg>Print QR Labels</a>
+        <a href="{% url 'item_create' %}" class="btn" style="margin-left: 10px;"><svg class="icon"><use href="#icon-plus"></use></svg>Add Item</a>
+    </div>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="filter-chip-row" aria-label="Item status filters">
+        <a class="filter-chip {% if not selected_status %}active{% endif %}" href="{% url 'item_list' %}{% if search_query or selected_category or selected_sort != 'name' %}?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}{% if selected_category %}category={{ selected_category|urlencode }}&{% endif %}{% if selected_sort != 'name' %}sort={{ selected_sort|urlencode }}{% endif %}{% endif %}">All</a>
+        <a class="filter-chip {% if selected_status == 'Available' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}status=Available{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}{% if selected_sort != 'name' %}&sort={{ selected_sort|urlencode }}{% endif %}">Available</a>
+        <a class="filter-chip {% if selected_status == 'Borrowed' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}status=Borrowed{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}{% if selected_sort != 'name' %}&sort={{ selected_sort|urlencode }}{% endif %}">Borrowed</a>
+        <a class="filter-chip {% if selected_status == 'Maintenance' %}active{% endif %}" href="?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}status=Maintenance{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}{% if selected_sort != 'name' %}&sort={{ selected_sort|urlencode }}{% endif %}">Maintenance</a>
+    </div>
+
+    <div class="form-group">
+        <label for="search">Search Items</label>
+        <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Code, name, category, or description">
+    </div>
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select name="status" id="status">
+            <option value="">All</option>
+            <option value="Available" {% if selected_status == 'Available' %}selected{% endif %}>Available</option>
+            <option value="Borrowed" {% if selected_status == 'Borrowed' %}selected{% endif %}>Borrowed</option>
+            <option value="Maintenance" {% if selected_status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="category">Category</label>
+        <select name="category" id="category">
+            <option value="">All categories</option>
+            {% for category in categories %}
+                <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="sort">Sort</label>
+        <select name="sort" id="sort">
+            <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name A-Z</option>
+            <option value="date_added" {% if selected_sort == 'date_added' %}selected{% endif %}>Date Added</option>
+            <option value="category" {% if selected_sort == 'category' %}selected{% endif %}>Category</option>
+            <option value="status" {% if selected_sort == 'status' %}selected{% endif %}>Status</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Filter</button>
+        <a href="{% url 'item_list' %}" class="btn btn-secondary" style="margin-left: 8px;">Clear</a>
+    </div>
+</form>
+
+<div class="table-container">
+    <div class="table-meta">
+        <div class="muted">{{ item_total }} item{{ item_total|pluralize }} found</div>
+        <div class="quick-actions">
+            <a href="{% url 'item_qr_labels' %}?{% if search_query %}search={{ search_query|urlencode }}&{% endif %}{% if selected_status %}status={{ selected_status|urlencode }}&{% endif %}{% if selected_category %}category={{ selected_category|urlencode }}{% endif %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-receipt"></use></svg>Print Filtered Labels</a>
+            <a href="{% url 'maintenance_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-wrench"></use></svg>View Maintenance History</a>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Item Code</th>
+                <th scope="col">Item Name</th>
+                <th scope="col">Category</th>
+                <th scope="col">Description</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.item_code }}</td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.category }}</td>
+                <td>{{ item.description|default:"-" }}</td>
+                <td>
+                    {% if item.status == 'Available' %}
+                        <span class="status-badge status-available">Available</span>
+                    {% elif item.status == 'Borrowed' %}
+                        <span class="status-badge status-borrowed">Borrowed</span>
+                    {% else %}
+                        <span class="status-badge status-maintenance">Maintenance</span>
+                    {% endif %}
+                </td>
+                <td class="actions">
+                    <a href="{% url 'public_item_detail' item.pk %}" target="_blank" rel="noopener"><svg class="icon"><use href="#icon-eye"></use></svg>QR Page</a>
+                    <a href="{% url 'item_edit' item.pk %}"><svg class="icon"><use href="#icon-edit"></use></svg>Edit</a>
+                    {% if can_manage_records %}
+                        <a href="{% url 'item_delete' item.pk %}"><svg class="icon"><use href="#icon-archive"></use></svg>Archive</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">No items matched your filters. Try another search or add equipment to the inventory.</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=items querystring=querystring %}
+</div>
+{% endblock %}

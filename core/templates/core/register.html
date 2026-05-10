@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Campus Equipment Borrowing System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI Variable", "Trebuchet MS", "Segoe UI", sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, rgba(17, 79, 214, 0.18), transparent 34%), linear-gradient(180deg, #0f1c31 0%, #172a47 38%, #edf2f8 38%, #edf2f8 100%);
+            display: grid;
+            place-items: center;
+            padding: 28px;
+        }
+
+        .register-shell {
+            width: 100%;
+            max-width: 720px;
+            background: rgba(255,255,255,0.96);
+            border-radius: 28px;
+            box-shadow: 0 30px 60px rgba(8, 19, 38, 0.18);
+            overflow: hidden;
+            border: 1px solid rgba(121, 144, 182, 0.18);
+        }
+
+        .register-header {
+            padding: 34px 36px 24px;
+            background: linear-gradient(135deg, #0e3f9b, #114fd6 56%, #2ac4dc);
+            color: white;
+        }
+
+        .register-header .eyebrow {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .register-header h1 {
+            font-size: 34px;
+            letter-spacing: -0.04em;
+            margin-bottom: 8px;
+        }
+
+        .register-header p {
+            color: rgba(255,255,255,0.84);
+            line-height: 1.6;
+            max-width: 540px;
+        }
+
+        .register-body {
+            padding: 30px 36px 34px;
+            background: linear-gradient(180deg, #fbfcfe 0%, #f4f7fb 100%);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #334155;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid rgba(121, 144, 182, 0.3);
+            border-radius: 16px;
+            font-size: 14px;
+            background: rgba(255,255,255,0.98);
+            transition: 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: rgba(17, 79, 214, 0.52);
+            box-shadow: 0 0 0 4px rgba(17, 79, 214, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #114fd6, #2a79ff);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 18px 28px rgba(17, 79, 214, 0.18);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .link-text {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .link-text a {
+            color: #114fd6;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .link-text a:hover {
+            text-decoration: underline;
+        }
+
+        .errorlist {
+            color: #b42318;
+            list-style: none;
+            padding-left: 0;
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 640px) {
+            .register-header,
+            .register-body {
+                padding: 24px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-shell">
+        <div class="register-header">
+            <div class="eyebrow">{% if staff_signup %}Staff Sign Up{% else %}Authorized Setup{% endif %}</div>
+            <h1>{% if setup_mode %}Create First Administrator{% elif staff_signup %}Create Staff Account{% else %}Create Staff Account{% endif %}</h1>
+            <p>{% if setup_mode %}Set up the first authorized administrator account for the campus equipment borrowing system.{% elif staff_signup %}Create your staff account so you can sign in to the borrowing system.{% else %}Create a new authorized account for staff or administrator access.{% endif %}</p>
+        </div>
+
+        <div class="register-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_first_name">First Name</label>
+                        {{ form.first_name }}
+                        {{ form.first_name.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_last_name">Last Name</label>
+                        {{ form.last_name }}
+                        {{ form.last_name.errors }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    {{ form.username }}
+                    {{ form.username.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+
+                {% if not setup_mode and not staff_signup %}
+                    <div class="form-group">
+                        <label for="id_role">Role</label>
+                        {{ form.role }}
+                        {{ form.role.errors }}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="id_password1">Password</label>
+                    {{ form.password1 }}
+                    {{ form.password1.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password2">Confirm Password</label>
+                    {{ form.password2 }}
+                    {{ form.password2.errors }}
+                </div>
+
+                <button type="submit" class="btn">{% if setup_mode %}Create Administrator Account{% elif staff_signup %}Create Staff Account{% else %}Create Authorized Account{% endif %}</button>
+            </form>
+
+            <div class="link-text">
+                {% if setup_mode or staff_signup %}
+                    Already have an account?
+                    <a href="/login/">Sign in</a>
+                {% else %}
+                    Back to
+                    <a href="/users/">user management</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

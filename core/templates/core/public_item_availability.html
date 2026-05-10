@@ -1,0 +1,481 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Equipment Availability</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #eef2f9;
+            --surface: #ffffff;
+            --text: #10213d;
+            --muted: #617289;
+            --primary: #1d4ed8;
+            --border: rgba(121, 144, 182, 0.18);
+            --shadow: 0 4px 24px rgba(15, 31, 61, 0.07);
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Segoe UI Variable", "Trebuchet MS", "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :focus-visible {
+            outline: 3px solid rgba(29, 78, 216, 0.72);
+            outline-offset: 3px;
+        }
+
+        .skip-link {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 20;
+            transform: translateY(-160%);
+            padding: 11px 16px;
+            border-radius: 12px;
+            background: #ffffff;
+            color: var(--primary);
+            font-weight: 800;
+            box-shadow: var(--shadow);
+            transition: transform 0.18s ease;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        .public-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .public-header-inner,
+        .public-main {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        .public-header-inner {
+            min-height: 78px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand img {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .brand strong {
+            display: block;
+            font-size: 16px;
+        }
+
+        .brand span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .login-link,
+        .btn {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), #2a79ff);
+            color: #ffffff;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .login-link svg,
+        .btn svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-secondary {
+            background: #f0f4fa;
+            color: #334155;
+            border: 1px solid var(--border);
+        }
+
+        .public-main {
+            padding: 34px 0 44px;
+        }
+
+        .page-intro {
+            margin-bottom: 24px;
+        }
+
+        .eyebrow {
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: clamp(28px, 5vw, 44px);
+            line-height: 1.05;
+            margin-bottom: 10px;
+        }
+
+        .page-intro p {
+            max-width: 720px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .summary-grid,
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+        }
+
+        .summary-grid {
+            margin-bottom: 22px;
+        }
+
+        .summary-card,
+        .filter-panel,
+        .item-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-card {
+            padding: 18px;
+        }
+
+        .summary-card span {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .summary-card strong {
+            font-size: 32px;
+            line-height: 1;
+        }
+
+        .filter-panel {
+            padding: 18px;
+            margin-bottom: 22px;
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: minmax(220px, 1.5fr) minmax(180px, 1fr) minmax(180px, 1fr) auto auto;
+            gap: 14px;
+            align-items: end;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 900;
+            color: #334155;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        input,
+        select {
+            width: 100%;
+            min-height: 44px;
+            border: 1px solid rgba(121, 144, 182, 0.24);
+            border-radius: 12px;
+            padding: 11px 12px;
+            color: var(--text);
+            background: #fafbfd;
+            font: inherit;
+        }
+
+        .results-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .item-card {
+            padding: 18px;
+            display: grid;
+            gap: 12px;
+            align-content: start;
+        }
+
+        .item-card h2 {
+            font-size: 19px;
+            line-height: 1.25;
+        }
+
+        .item-meta {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .item-description {
+            color: #334155;
+            line-height: 1.55;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            width: max-content;
+            display: inline-flex;
+            align-items: center;
+            min-height: 30px;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .status-available {
+            background: #ddf7e8;
+            color: #16623d;
+        }
+
+        .status-borrowed {
+            background: #fff2da;
+            color: #8b5e00;
+        }
+
+        .status-maintenance {
+            background: #fde7e7;
+            color: #8d2222;
+        }
+
+        .empty-state {
+            padding: 34px;
+            text-align: center;
+            color: var(--muted);
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-links a,
+        .pagination-links span {
+            padding: 9px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .pagination-links .current {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: transparent;
+        }
+
+        @media (max-width: 820px) {
+            .public-header-inner {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 16px 0;
+            }
+
+            .filter-form {
+                grid-template-columns: 1fr;
+            }
+
+            .login-link,
+            .btn {
+                width: 100%;
+            }
+
+            .results-meta {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    <header class="public-header">
+        <div class="public-header-inner">
+            <div class="brand">
+                <img src="{% if system_settings.school_logo_url %}{{ system_settings.school_logo_url }}{% else %}{% static 'core/images/sidebar-brand-logo.png' %}{% endif %}" alt="{{ system_settings.school_name }}">
+                <div>
+                    <strong>{{ system_settings.school_name }}</strong>
+                    <span>Public equipment availability</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="{% url 'public_borrower_lookup' %}" class="btn btn-secondary">Borrower Lookup</a>
+                <a href="{% url 'login' %}" class="login-link">Staff Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="public-main" id="main-content" tabindex="-1">
+        <section class="page-intro">
+            <div class="eyebrow">Equipment Status</div>
+            <h1>Check Available Campus Equipment</h1>
+            <p>Browse active equipment records and current availability. Borrowing and administrative details remain restricted to authorized staff.</p>
+        </section>
+
+        <section class="summary-grid" aria-label="Availability summary">
+            <div class="summary-card">
+                <span>Total Listed</span>
+                <strong>{{ summary.total }}</strong>
+            </div>
+            <div class="summary-card">
+                <span>Available</span>
+                <strong>{{ summary.available }}</strong>
+            </div>
+            <div class="summary-card">
+                <span>Borrowed</span>
+                <strong>{{ summary.borrowed }}</strong>
+            </div>
+            <div class="summary-card">
+                <span>Maintenance</span>
+                <strong>{{ summary.maintenance }}</strong>
+            </div>
+        </section>
+
+        <section class="filter-panel" aria-label="Filter equipment">
+            <form method="GET" class="filter-form">
+                <div class="form-group">
+                    <label for="search">Search</label>
+                    <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Equipment name, category, or description">
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select name="status" id="status">
+                        <option value="">All Statuses</option>
+                        <option value="Available" {% if selected_status == 'Available' %}selected{% endif %}>Available</option>
+                        <option value="Borrowed" {% if selected_status == 'Borrowed' %}selected{% endif %}>Borrowed</option>
+                        <option value="Maintenance" {% if selected_status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select name="category" id="category">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                            <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    Apply
+                </button>
+                <a href="{% url 'public_item_availability' %}" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path></svg>
+                    Reset
+                </a>
+            </form>
+        </section>
+
+        <div class="results-meta">
+            <strong>{{ item_total }} equipment record{{ item_total|pluralize }} found</strong>
+            <span>Updated from the live inventory system</span>
+        </div>
+
+        <section class="item-grid" aria-label="Equipment list">
+            {% for item in items %}
+                <article class="item-card">
+                    <span class="status-badge {% if item.status == 'Available' %}status-available{% elif item.status == 'Borrowed' %}status-borrowed{% else %}status-maintenance{% endif %}">
+                        {{ item.status }}
+                    </span>
+                    <div>
+                        <h2>{{ item.item_name }}</h2>
+                        <div class="item-meta">{{ item.category|default:"Uncategorized" }}</div>
+                    </div>
+                    <p class="item-description">{{ item.description|default:"No public description is available for this equipment." }}</p>
+                    <a href="{% url 'public_item_detail' item.pk %}" class="btn btn-secondary">View QR Status Page</a>
+                </article>
+            {% empty %}
+                <div class="empty-state">
+                    No equipment matched the current filters.
+                </div>
+            {% endfor %}
+        </section>
+
+        {% include 'core/pagination.html' with page_obj=items querystring=querystring %}
+    </main>
+</body>
+</html>

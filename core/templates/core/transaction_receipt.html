@@ -1,0 +1,84 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Transaction Receipt{% endblock %}
+{% block header %}Transaction Receipt{% endblock %}
+{% block breadcrumb_current %}Receipt #{{ transaction.pk }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>
+            {% if transaction.status == 'Returned' %}
+                <svg class="icon"><use href="#icon-receipt"></use></svg> Return Receipt
+            {% else %}
+                <svg class="icon"><use href="#icon-receipt"></use></svg> Borrow Receipt
+            {% endif %}
+        </h2>
+        <div class="page-subtext">Transaction #{{ transaction.pk }} for {{ transaction.item.item_name }}.</div>
+    </div>
+    <div>
+        <button type="button" class="btn btn-secondary" onclick="window.print()"><svg class="icon"><use href="#icon-receipt"></use></svg>Print Receipt</button>
+        <a href="{% url 'borrow_item' %}" class="btn" style="margin-left: 10px;"><svg class="icon"><use href="#icon-plus"></use></svg>New Borrow</a>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="receipt-grid">
+        <div class="receipt-row">
+            <div class="receipt-label">Status</div>
+            <div class="receipt-value">
+                {% if transaction.status == 'Borrowed' %}
+                    <span class="status-badge status-borrowed">{{ transaction.status }}</span>
+                {% elif transaction.status == 'Returned' %}
+                    <span class="status-badge status-returned">{{ transaction.status }}</span>
+                {% else %}
+                    <span class="status-badge status-overdue">{{ transaction.status }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="receipt-row">
+            <div class="receipt-label">Processed Record</div>
+            <div class="receipt-value">Transaction #{{ transaction.pk }}</div>
+        </div>
+        <div class="receipt-row">
+            <div class="receipt-label">Borrower</div>
+            <div class="receipt-value">{{ transaction.borrower.full_name }} ({{ transaction.borrower.school_id }})</div>
+        </div>
+        <div class="receipt-row">
+            <div class="receipt-label">Equipment</div>
+            <div class="receipt-value">{{ transaction.item.item_name }} ({{ transaction.item.item_code }})</div>
+        </div>
+        <div class="receipt-row">
+            <div class="receipt-label">Borrow Time</div>
+            <div class="receipt-value">{{ transaction.borrow_time }}</div>
+        </div>
+        <div class="receipt-row">
+            <div class="receipt-label">Due Time</div>
+            <div class="receipt-value">{{ transaction.due_time }}</div>
+        </div>
+        <div class="receipt-row">
+            <div class="receipt-label">Return Time</div>
+            <div class="receipt-value">{{ transaction.return_time|default:"Not returned yet" }}</div>
+        </div>
+        <div class="receipt-row">
+            <div class="receipt-label">Condition</div>
+            <div class="receipt-value">
+                Released: {{ transaction.borrowed_condition }}
+                {% if transaction.returned_condition %}
+                    <br>Returned: {{ transaction.returned_condition }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="receipt-row" style="grid-column: 1 / -1;">
+            <div class="receipt-label">Notes</div>
+            <div class="receipt-value">{{ transaction.notes|default:"No notes recorded." }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <a href="{% url 'transaction_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-list"></use></svg>View Transactions</a>
+    <a href="{% url 'return_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-return"></use></svg>Process Return</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-dashboard"></use></svg>Back to Dashboard</a>
+</div>
+{% endblock %}

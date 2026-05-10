@@ -1,0 +1,733 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI Variable", "Trebuchet MS", "Segoe UI", sans-serif;
+            min-height: 100vh;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.72) 0, rgba(255,255,255,0) 42px),
+                radial-gradient(circle at 50% -20%, rgba(79, 140, 255, 0.34), transparent 38%),
+                linear-gradient(180deg, #0f2d5a 0%, #12386f 100%);
+            display: grid;
+            place-items: center;
+            padding: 6px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+                linear-gradient(115deg, transparent 0 28%, rgba(255,255,255,0.06) 28% 31%, transparent 31% 100%),
+                linear-gradient(180deg, rgba(7, 13, 28, 0.08), rgba(15, 45, 90, 0.18));
+            pointer-events: none;
+            animation: lightSweep 9s ease-in-out infinite;
+        }
+
+        .auth-shell {
+            width: 100%;
+            max-width: 520px;
+            border-radius: 0 0 24px 24px;
+            overflow: hidden;
+            box-shadow: 0 34px 80px rgba(1, 10, 26, 0.34);
+            background: rgba(13, 42, 83, 0.94);
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(117, 169, 255, 0.20);
+            backdrop-filter: blur(18px);
+            animation: cardIn 0.58s ease-out both;
+        }
+
+        .auth-shell::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto;
+            height: 4px;
+            background: linear-gradient(90deg, #114fd6, #2ac4dc, #169b54, #114fd6);
+            background-size: 220% 100%;
+            animation: premiumRail 5s linear infinite;
+            z-index: 2;
+        }
+
+        .auth-panel {
+            padding: 30px 36px 38px;
+            background: linear-gradient(180deg, rgba(13, 42, 83, 0.98) 0%, rgba(16, 50, 98, 0.98) 100%);
+            color: #ffffff;
+        }
+
+        .brand-title {
+            color: #8ec5ff;
+            font-size: 15px;
+            font-weight: 900;
+            line-height: 1.2;
+            letter-spacing: 0.16em;
+            margin-bottom: 28px;
+            padding: 0;
+            text-align: center;
+            text-transform: uppercase;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            position: relative;
+        }
+
+        .brand-title::after {
+            display: none;
+        }
+
+        .auth-panel > p {
+            color: #78b7ff;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .auth-mark {
+            width: 64px;
+            height: 64px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 20px;
+            border-radius: 18px;
+            background: #2f6df2;
+            color: #ffffff;
+            box-shadow: 0 18px 34px rgba(47, 109, 242, 0.28);
+        }
+
+        .auth-mark svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .step-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 12px 0 30px;
+        }
+
+        .step-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: rgba(120, 183, 255, 0.22);
+        }
+
+        .step-dot.active {
+            width: 23px;
+            background: #3378ff;
+        }
+
+        .auth-step[hidden] {
+            display: none;
+        }
+
+        .auth-heading {
+            color: #ffffff;
+            font-size: 26px;
+            line-height: 1.15;
+            margin-bottom: 8px;
+            text-align: center;
+            letter-spacing: 0;
+        }
+
+        .auth-subheading {
+            color: #6fb5ff;
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .role-choice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 28px;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+        }
+
+        .role-choice {
+            display: block;
+            cursor: pointer;
+        }
+
+        .role-choice input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .role-choice-card {
+            display: grid;
+            align-items: center;
+            justify-items: center;
+            border: 1px solid rgba(96, 165, 250, 0.22);
+            background: rgba(18, 56, 111, 0.50);
+            border-radius: 17px;
+            padding: 52px 18px 26px;
+            min-height: 194px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+        }
+
+        .role-choice:hover .role-choice-card {
+            background: rgba(22, 68, 132, 0.78);
+            border-color: rgba(96, 165, 250, 0.42);
+            box-shadow: 0 16px 28px rgba(1, 10, 26, 0.16);
+        }
+
+        .role-choice input:checked + .role-choice-card {
+            border-color: rgba(71, 132, 255, 0.78);
+            background: rgba(28, 82, 158, 0.86);
+            box-shadow: 0 0 0 4px rgba(51, 120, 255, 0.18), 0 16px 30px rgba(1, 10, 26, 0.22);
+            transform: translateY(-2px);
+        }
+
+        .role-choice input:focus + .role-choice-card {
+            outline: 2px solid rgba(17, 79, 214, 0.55);
+            outline-offset: 3px;
+        }
+
+        .access-role {
+            display: grid;
+            justify-items: center;
+            gap: 10px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 900;
+            margin-bottom: 0;
+            letter-spacing: 0;
+        }
+
+        .role-dot {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: rgba(24, 68, 130, 0.88);
+            box-shadow: none;
+        }
+
+        .role-dot svg {
+            width: 26px;
+            height: 26px;
+            stroke-width: 2;
+        }
+
+        .role-admin {
+            color: #facc15;
+        }
+
+        .role-staff {
+            color: #7bbcff;
+        }
+
+        .role-copy {
+            color: #65a8f8;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .setup-card {
+            border: 1px solid #bfdbfe;
+            background: #eff6ff;
+            color: #1e3a8a;
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .setup-card a {
+            color: #114fd6;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .setup-card a:hover {
+            text-decoration: underline;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #8ec5ff;
+            font-size: 16px;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 16px;
+            border: 1px solid rgba(96, 165, 250, 0.26);
+            border-radius: 12px;
+            font-size: 16px;
+            background: rgba(48, 82, 144, 0.70);
+            color: #ffffff;
+            transition: 0.2s ease;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        .form-group input::placeholder {
+            color: #78aee8;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: rgba(99, 163, 255, 0.76);
+            box-shadow: 0 0 0 4px rgba(51, 120, 255, 0.16);
+            background: rgba(48, 82, 144, 0.92);
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-field input {
+            padding-right: 112px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            min-height: 36px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 12px;
+            background: #edf5ff;
+            color: #114fd6;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .remember-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 4px 0 16px;
+            color: #8ec5ff;
+            font-size: 14px;
+        }
+
+        .remember-row input {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: #114fd6;
+        }
+
+        .field-error {
+            margin-top: 8px;
+            color: #b42318;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .btn {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 16px;
+            background: #2f6df2;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 18px 34px rgba(17, 79, 214, 0.25);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:disabled {
+            opacity: 0.34;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid rgba(96, 165, 250, 0.28);
+            color: #8ec5ff;
+            box-shadow: none;
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(110deg, transparent 0 35%, rgba(255,255,255,0.34) 48%, transparent 62% 100%);
+            transform: translateX(-120%);
+            animation: buttonShine 4.5s ease-in-out infinite;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 22px 40px rgba(17, 79, 214, 0.32);
+        }
+
+        .btn[aria-busy="true"] {
+            pointer-events: none;
+            opacity: 0.78;
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .link-text {
+            margin-top: 22px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .link-text a {
+            color: #70b8ff;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .link-text a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #ff9aa2;
+            background: rgba(127, 29, 29, 0.16);
+            border: 1px solid rgba(248, 113, 113, 0.22);
+            border-radius: 14px;
+            margin-bottom: 14px;
+            padding: 12px 14px;
+            font-size: 14px;
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes premiumRail {
+            from { background-position: 0% 50%; }
+            to { background-position: 220% 50%; }
+        }
+
+        @keyframes titleShine {
+            0%, 58% { transform: translateX(-120%); }
+            76%, 100% { transform: translateX(120%); }
+        }
+
+        @keyframes buttonShine {
+            0%, 55% { transform: translateX(-120%); }
+            72%, 100% { transform: translateX(120%); }
+        }
+
+        @keyframes lightSweep {
+            0%, 100% { opacity: 0.70; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes backgroundDrift {
+            from { background-position: center center; }
+            to { background-position: center 48%; }
+        }
+
+        @media (max-width: 900px) {
+            .auth-panel {
+                padding: 28px 24px 34px;
+            }
+
+            .role-choice-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-title {
+                font-size: 18px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-shell">
+        <section class="auth-panel">
+            <div class="auth-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                    <path d="M12 14v2"></path>
+                </svg>
+            </div>
+            <div class="brand-title">Campus Equipment Hub</div>
+
+            {% if allow_setup_registration %}
+                <div class="setup-card">
+                    No admin account exists yet.
+                    <a href="/register/">Create the first administrator account</a>
+                    to unlock the system.
+                </div>
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            {% elif form.errors %}
+                <div class="error-message">Invalid username or password.</div>
+            {% endif %}
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="error-message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next_url }}">
+
+                <section class="auth-step" id="role-step" {% if form.errors %}hidden{% endif %}>
+                    <div class="step-dots" aria-hidden="true">
+                        <span class="step-dot active"></span>
+                        <span class="step-dot"></span>
+                    </div>
+                    <h1 class="auth-heading">Who are you signing in as?</h1>
+                    <div class="auth-subheading">Choose your role to continue</div>
+
+                    <div class="role-choice-grid" aria-label="Choose login role">
+                        {% for radio in form.login_role %}
+                            <label class="role-choice" for="{{ radio.id_for_label }}">
+                                {{ radio.tag }}
+                                <span class="role-choice-card">
+                                    {% if radio.choice_label == 'Admin' %}
+                                        <span class="access-role">
+                                            <span class="role-dot role-admin">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3z"></path>
+                                                </svg>
+                                            </span>
+                                            Admin
+                                            <span class="role-copy">Full system access</span>
+                                        </span>
+                                    {% else %}
+                                        <span class="access-role">
+                                            <span class="role-dot role-staff">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                                    <circle cx="12" cy="7" r="4"></circle>
+                                                </svg>
+                                            </span>
+                                            Staff
+                                            <span class="role-copy">Borrow &amp; return</span>
+                                        </span>
+                                    {% endif %}
+                                </span>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <button type="button" class="btn" id="continue-login" disabled>
+                        Continue
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    </button>
+                </section>
+
+                <section class="auth-step" id="login-step" {% if not form.errors %}hidden{% endif %}>
+                    <div class="step-dots" aria-hidden="true">
+                        <span class="step-dot"></span>
+                        <span class="step-dot active"></span>
+                    </div>
+                    <h1 class="auth-heading">Sign in to your account</h1>
+                    <div class="auth-subheading" id="selected-role-label">Use your authorized account credentials</div>
+
+                <div class="form-group">
+                    <label for="id_username">Username</label>
+                    {{ form.username }}
+                    {% for error in form.username.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password">Password</label>
+                    <div class="password-field">
+                        {{ form.password }}
+                        <button type="button" class="password-toggle" data-password-toggle aria-controls="id_password">Show</button>
+                    </div>
+                    {% for error in form.password.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <label class="remember-row" for="id_remember_me">
+                    {{ form.remember_me }}
+                    <span>
+                        Remember me
+                        <span id="remember-help" style="display: block; color: #64748b; font-size: 12px; margin-top: 2px;">Keep this browser signed in for 14 days.</span>
+                    </span>
+                </label>
+
+                    <button type="submit" class="btn" data-loading-label="Signing in...">
+                        Sign in
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    </button>
+                    <button type="button" class="btn btn-ghost" id="back-to-role" style="margin-top: 12px;">
+                        <svg viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+                        Back to role selection
+                    </button>
+                </section>
+            </form>
+
+            <div class="link-text">
+                <a href="{% url 'password_reset' %}">Forgot your password?</a>
+            </div>
+
+            <div class="link-text">
+                <a href="{% url 'public_item_availability' %}">View public equipment availability</a>
+            </div>
+
+            {% if not allow_setup_registration %}
+                <div class="link-text">
+                    No staff account yet?
+                    <a href="{% url 'staff_signup' %}">Sign up as staff</a>
+                </div>
+            {% endif %}
+
+        </section>
+    </div>
+    <script>
+        const passwordToggle = document.querySelector('[data-password-toggle]');
+        const passwordInput = document.getElementById('id_password');
+        const roleStep = document.getElementById('role-step');
+        const loginStep = document.getElementById('login-step');
+        const continueButton = document.getElementById('continue-login');
+        const backButton = document.getElementById('back-to-role');
+        const selectedRoleLabel = document.getElementById('selected-role-label');
+        const roleInputs = Array.from(document.querySelectorAll('input[name="login_role"]'));
+
+        function selectedRole() {
+            return roleInputs.find((input) => input.checked);
+        }
+
+        function updateRoleState() {
+            const role = selectedRole();
+            if (continueButton) {
+                continueButton.disabled = !role;
+            }
+            if (selectedRoleLabel && role) {
+                selectedRoleLabel.textContent = `${role.value} access selected`;
+            }
+        }
+
+        function showLoginStep() {
+            if (!selectedRole()) {
+                return;
+            }
+            roleStep.hidden = true;
+            loginStep.hidden = false;
+            updateRoleState();
+            const username = document.getElementById('id_username');
+            if (username) {
+                username.focus();
+            }
+        }
+
+        function showRoleStep() {
+            loginStep.hidden = true;
+            roleStep.hidden = false;
+            updateRoleState();
+        }
+
+        roleInputs.forEach((input) => {
+            input.addEventListener('change', updateRoleState);
+            input.addEventListener('change', () => {
+                window.setTimeout(showLoginStep, 120);
+            });
+        });
+
+        if (continueButton) {
+            continueButton.addEventListener('click', showLoginStep);
+        }
+
+        if (backButton) {
+            backButton.addEventListener('click', showRoleStep);
+        }
+
+        updateRoleState();
+        if (!loginStep.hidden) {
+            updateRoleState();
+        }
+
+        if (passwordToggle && passwordInput) {
+            passwordToggle.addEventListener('click', () => {
+                const hidden = passwordInput.type === 'password';
+                passwordInput.type = hidden ? 'text' : 'password';
+                passwordToggle.textContent = hidden ? 'Hide' : 'Show';
+            });
+        }
+
+        document.querySelectorAll('form').forEach((form) => {
+            form.addEventListener('submit', () => {
+                const button = form.querySelector('[data-loading-label]');
+                if (!button) {
+                    return;
+                }
+                button.setAttribute('aria-busy', 'true');
+                button.textContent = button.dataset.loadingLabel;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Borrower Lookup</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #eef2f9;
+            --surface: #ffffff;
+            --text: #10213d;
+            --muted: #617289;
+            --primary: #1d4ed8;
+            --border: rgba(121, 144, 182, 0.18);
+            --shadow: 0 4px 24px rgba(15, 31, 61, 0.07);
+        }
+        body {
+            min-height: 100vh;
+            font-family: "Segoe UI Variable", "Trebuchet MS", "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+        a { color: inherit; }
+        :focus-visible { outline: 3px solid rgba(29, 78, 216, 0.72); outline-offset: 3px; }
+        .public-header { background: #ffffff; border-bottom: 1px solid var(--border); }
+        .public-header-inner, .public-main { width: min(1040px, calc(100% - 32px)); margin: 0 auto; }
+        .public-header-inner { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .brand img { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
+        .brand strong { display: block; font-size: 16px; }
+        .brand span { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+        .btn {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), #2a79ff);
+            color: #ffffff;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn-secondary { background: #f0f4fa; color: #334155; border: 1px solid var(--border); }
+        .public-main { padding: 34px 0 44px; }
+        .page-intro { margin-bottom: 24px; }
+        .eyebrow { color: var(--primary); font-size: 12px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+        h1 { font-size: clamp(28px, 5vw, 42px); line-height: 1.05; margin-bottom: 10px; }
+        .page-intro p { max-width: 720px; color: var(--muted); line-height: 1.6; }
+        .panel, .status-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+        .panel { padding: 20px; margin-bottom: 18px; }
+        .lookup-form {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;
+            gap: 14px;
+            align-items: end;
+        }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #355074; }
+        input {
+            width: 100%;
+            min-height: 44px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 11px 12px;
+            color: var(--text);
+            background: #f8fbff;
+        }
+        .form-error, .empty-state {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 12px;
+            background: #fff7ed;
+            color: #9a3412;
+            border: 1px solid rgba(251, 146, 60, 0.24);
+        }
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+        .status-card { padding: 18px; }
+        .status-card h2 { font-size: 18px; margin-bottom: 8px; }
+        .muted { color: var(--muted); line-height: 1.5; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 900;
+            background: #dbeafe;
+            color: #1d4ed8;
+            margin-bottom: 12px;
+        }
+        .badge-danger { background: #fee2e2; color: #b91c1c; }
+        .badge-ok { background: #dcfce7; color: #166534; }
+        @media (max-width: 760px) {
+            .public-header-inner { align-items: flex-start; flex-direction: column; padding: 16px 0; }
+            .lookup-form { grid-template-columns: 1fr; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header class="public-header">
+        <div class="public-header-inner">
+            <div class="brand">
+                <img src="{% if system_settings.school_logo_url %}{{ system_settings.school_logo_url }}{% else %}{% static 'core/images/sidebar-brand-logo.png' %}{% endif %}" alt="{{ system_settings.school_name }}">
+                <div>
+                    <strong>{{ system_settings.school_name }}</strong>
+                    <span>Borrower self-service lookup</span>
+                </div>
+            </div>
+            <a href="{% url 'public_item_availability' %}" class="btn btn-secondary">Equipment Availability</a>
+        </div>
+    </header>
+
+    <main class="public-main">
+        <section class="page-intro">
+            <div class="eyebrow">Borrower Portal</div>
+            <h1>Check your borrowed equipment</h1>
+            <p>Enter your school ID and registered email to view your active borrowing status and recent returned items.</p>
+        </section>
+
+        <section class="panel">
+            <form method="GET" class="lookup-form">
+                <div class="form-group">
+                    <label for="id_school_id">School ID</label>
+                    {{ form.school_id }}
+                    {{ form.school_id.errors }}
+                </div>
+                <div class="form-group">
+                    <label for="id_email">Registered Email</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+                <button type="submit" class="btn">Check Status</button>
+            </form>
+            {% if lookup_attempted and not borrower and form.is_valid %}
+                <div class="empty-state">No matching active borrower record was found. Ask staff to verify your school ID and registered email.</div>
+            {% endif %}
+        </section>
+
+        {% if borrower %}
+            <section class="panel">
+                <span class="badge badge-ok">Verified</span>
+                <h2>{{ borrower.full_name }}</h2>
+                <p class="muted">{{ borrower.program|default:"Program not provided" }}{% if borrower.section %} | {{ borrower.section }}{% endif %}</p>
+            </section>
+
+            <section class="status-grid" aria-label="Borrowing status">
+                {% for transaction in active_transactions %}
+                    <article class="status-card">
+                        <span class="badge {% if transaction.status == 'Overdue' %}badge-danger{% else %}badge-ok{% endif %}">{{ transaction.status }}</span>
+                        <h2>{{ transaction.item.item_name }}</h2>
+                        <p class="muted">Due: {{ transaction.due_time }}</p>
+                        <p class="muted">Condition: {{ transaction.borrowed_condition }}</p>
+                    </article>
+                {% empty %}
+                    <article class="status-card">
+                        <span class="badge badge-ok">Clear</span>
+                        <h2>No active borrows</h2>
+                        <p class="muted">You currently have no borrowed equipment on record.</p>
+                    </article>
+                {% endfor %}
+            </section>
+
+            <section class="panel" style="margin-top: 18px;">
+                <h2>Recent Returns</h2>
+                <div class="status-grid" style="margin-top: 14px;">
+                    {% for transaction in recent_transactions %}
+                        <article class="status-card">
+                            <span class="badge">Returned</span>
+                            <h2>{{ transaction.item.item_name }}</h2>
+                            <p class="muted">Returned: {{ transaction.return_time }}</p>
+                        </article>
+                    {% empty %}
+                        <div class="empty-state">No recent returned items found.</div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </main>
+</body>
+</html>

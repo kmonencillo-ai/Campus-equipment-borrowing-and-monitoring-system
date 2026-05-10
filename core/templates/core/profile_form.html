@@ -1,0 +1,73 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block header %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>{{ page_title }}</h2>
+        <div class="page-subtext">Manage your own account details and keep your contact information current.</div>
+    </div>
+</div>
+
+<div class="form-container">
+    <form method="POST">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="id_first_name">First Name</label>
+                {{ form.first_name }}
+                {{ form.first_name.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_last_name">Last Name</label>
+                {{ form.last_name }}
+                {{ form.last_name.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_username">Username</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email</label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+        </div>
+
+        <div class="form-group full">
+            <label>Notification Preferences</label>
+            <div class="preference-grid">
+                <label class="preference-option" for="id_notify_by_email">
+                    {{ form.notify_by_email }}
+                    <span>
+                        <span class="preference-title">Email Notifications</span>
+                        <span class="preference-copy">Receive staff/admin email alerts for overdue items.</span>
+                    </span>
+                </label>
+
+                <label class="preference-option" for="id_notify_by_telegram">
+                    {{ form.notify_by_telegram }}
+                    <span>
+                        <span class="preference-title">Telegram Notifications</span>
+                        <span class="preference-copy">Send Telegram alerts when you process borrow and return records.</span>
+                    </span>
+                </label>
+            </div>
+            {{ form.notify_by_email.errors }}
+            {{ form.notify_by_telegram.errors }}
+        </div>
+
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-user"></use></svg>Save Profile</button>
+        <a href="{% url 'password_reset' %}" class="btn" style="margin-left: 10px; background: #64748b;"><svg class="icon"><use href="#icon-settings"></use></svg>Reset Password</a>
+    </form>
+</div>
+{% endblock %}

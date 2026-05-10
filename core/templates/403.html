@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Access Denied{% endblock %}
+{% block header %}Access Denied{% endblock %}
+{% block topbar_subtext %}This page is restricted to authorized users.{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Access denied</h2>
+    <p class="page-subtext" style="margin: 10px 0 20px;">
+        Your account does not have permission to open this page. Contact an administrator if you need access.
+    </p>
+    <a href="{% url 'dashboard' %}" class="btn">Back to Dashboard</a>
+</div>
+{% endblock %}

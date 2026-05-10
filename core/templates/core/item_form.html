@@ -1,0 +1,72 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Item Form{% endblock %}
+{% block header %}Item Form{% endblock %}
+{% block breadcrumb_current %}Equipment Form{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2><svg class="icon"><use href="#icon-box"></use></svg> Add / Edit Item</h2>
+        <div class="page-subtext">Enter equipment details below.</div>
+    </div>
+</div>
+
+<div class="form-container">
+    <form method="POST">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="id_item_code">Item Code</label>
+                {{ form.item_code }}
+                {{ form.item_code.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_item_name">Item Name</label>
+                {{ form.item_name }}
+                {{ form.item_name.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_category">Category</label>
+                {{ form.category }}
+                <datalist id="category-options">
+                    {% for category in form.category_options %}
+                        <option value="{{ category }}"></option>
+                    {% endfor %}
+                </datalist>
+                {{ form.category.errors }}
+                <div class="form-help">{{ form.category.help_text }}</div>
+            </div>
+
+            <div class="form-group full">
+                <label for="id_description">Description</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_status">Status</label>
+                {{ form.status }}
+                {{ form.status.errors }}
+            </div>
+
+            <div class="form-group full">
+                <label for="id_maintenance_notes">Maintenance Notes</label>
+                {{ form.maintenance_notes }}
+                {{ form.maintenance_notes.errors }}
+                <div class="form-help">{{ form.maintenance_notes.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-action-bar">
+            <a href="{% url 'item_list' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-list"></use></svg>Cancel</a>
+            <button type="submit" class="btn" data-loading-label="Saving item..."><svg class="icon"><use href="#icon-box"></use></svg>Save Item</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

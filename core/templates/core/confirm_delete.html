@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Confirm Delete{% endblock %}
+{% block header %}Confirm Delete{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Delete {{ object_type }}</h2>
+        <div class="page-subtext">Please confirm this action before continuing.</div>
+    </div>
+</div>
+
+<div class="form-container">
+    <p style="margin-bottom: 20px; color: #334155; font-size: 15px;">
+        Are you sure you want to {{ action_label|default:"Delete"|lower }} this {{ object_type|lower }}:
+        <strong>"{{ object_name }}"</strong>?
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger"><svg class="icon"><use href="#icon-alert"></use></svg>Yes, {{ action_label|default:"Delete" }}</button>
+        <a href="{{ cancel_url }}" class="btn" style="margin-left: 10px; background: #64748b;"><svg class="icon"><use href="#icon-return"></use></svg>Cancel</a>
+    </form>
+</div>
+{% endblock %}

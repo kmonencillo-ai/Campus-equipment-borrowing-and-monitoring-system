@@ -1,0 +1,86 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Borrow Item{% endblock %}
+{% block header %}Borrow Item{% endblock %}
+{% block breadcrumb_current %}New Borrow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2><svg class="icon"><use href="#icon-repeat"></use></svg> Borrow Equipment</h2>
+        <div class="page-subtext">Create a new borrowing transaction.</div>
+    </div>
+</div>
+
+<div class="stepper" aria-label="Borrowing steps">
+    <div class="step">
+        <div class="step-number">1</div>
+        <strong><svg class="icon"><use href="#icon-users"></use></svg> Select borrower</strong>
+        <span>Only active, non-archived borrowers are eligible.</span>
+    </div>
+    <div class="step">
+        <div class="step-number">2</div>
+        <strong><svg class="icon"><use href="#icon-box"></use></svg> Select equipment</strong>
+        <span>Availability is checked again when you confirm.</span>
+    </div>
+    <div class="step">
+        <div class="step-number">3</div>
+        <strong><svg class="icon"><use href="#icon-calendar"></use></svg> Set due date</strong>
+        <span>Future dates only, with overdue monitoring enabled.</span>
+    </div>
+    <div class="step">
+        <div class="step-number">4</div>
+        <strong><svg class="icon"><use href="#icon-receipt"></use></svg> Confirm receipt</strong>
+        <span>A printable transaction receipt is created after save.</span>
+    </div>
+</div>
+
+<div class="form-container">
+    <form method="POST">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="id_borrower">Borrower</label>
+                {{ form.borrower }}
+                {{ form.borrower.errors }}
+                <div class="form-help" id="borrower-help">Only active borrowers are shown here. Borrow limit is rechecked on submit.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_item">Item</label>
+                {{ form.item }}
+                {{ form.item.errors }}
+                <div class="form-help" id="item-help">Only currently available items can be borrowed. The item is locked while saving.</div>
+            </div>
+
+            <div class="form-group full">
+                <label for="id_due_time">Due Date and Time</label>
+                {{ form.due_time }}
+                {{ form.due_time.errors }}
+                <div class="form-help">Set a clear deadline so overdue monitoring remains accurate.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_borrowed_condition">Item Condition at Release</label>
+                {{ form.borrowed_condition }}
+                {{ form.borrowed_condition.errors }}
+            </div>
+
+            <div class="form-group full">
+                <label for="id_notes">Borrow Notes</label>
+                {{ form.notes }}
+                {{ form.notes.errors }}
+                <div class="form-help">Use this for purpose, room, class, or staff verification notes.</div>
+            </div>
+        </div>
+
+        <div class="form-action-bar">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary"><svg class="icon"><use href="#icon-dashboard"></use></svg>Cancel</a>
+            <button type="submit" class="btn" data-loading-label="Checking availability..."><svg class="icon"><use href="#icon-repeat"></use></svg>Confirm &amp; Process Borrow</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

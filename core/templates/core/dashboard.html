@@ -1,0 +1,637 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+    .wb-banner {
+        background: #0d1b3e;
+        border-radius: 18px;
+        padding: 28px 30px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 26px;
+        border: 1px solid rgba(82, 120, 196, 0.24);
+        margin-bottom: 24px;
+        min-height: 126px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    }
+
+    .wb-geo {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        border-radius: 16px;
+    }
+
+    .wb-left {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .wb-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #2f6fff 0%, #1f5bd8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: 0;
+        border: 1px solid rgba(147, 197, 253, 0.24);
+        text-transform: uppercase;
+    }
+
+    .wb-name {
+        color: #fff;
+        font-size: 20px;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: 0;
+        line-height: 1.08;
+        max-width: 240px;
+    }
+
+    .wb-sub {
+        color: #5a90d0;
+        font-size: 14px;
+        margin: 6px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        line-height: 1.35;
+        flex-wrap: wrap;
+    }
+
+    .wb-live {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #22d3ee;
+        flex-shrink: 0;
+    }
+
+    .wb-right {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: stretch;
+        gap: 12px;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .wb-focus {
+        min-width: 280px;
+        max-width: 430px;
+        padding: 14px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.09);
+        border: 1px solid rgba(147, 197, 253, 0.16);
+        display: grid;
+        gap: 12px;
+    }
+
+    .wb-focus-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+    }
+
+    .wb-focus-title {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    .wb-focus-text {
+        color: #8db8f0;
+        font-size: 12px;
+        line-height: 1.45;
+        margin-top: 3px;
+        max-width: 260px;
+    }
+
+    .wb-focus-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(34, 197, 94, 0.14);
+        color: #4ade80;
+        border: 1px solid rgba(74, 222, 128, 0.18);
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .wb-focus-badge.warning {
+        background: rgba(251, 191, 36, 0.13);
+        color: #fbbf24;
+        border-color: rgba(251, 191, 36, 0.18);
+    }
+
+    .wb-focus-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .wb-focus-action {
+        min-height: 36px;
+        padding: 8px 11px;
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.11);
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .wb-focus-action:hover {
+        color: #ffffff;
+        background: rgba(37, 99, 235, 0.28);
+    }
+
+    .wb-focus-action .icon,
+    .wb-focus-badge .icon {
+        width: 15px;
+        height: 15px;
+    }
+
+    .wb-sep {
+        width: 1px;
+        height: 34px;
+        background: rgba(148, 163, 184, 0.16);
+    }
+
+    .wb-stat {
+        text-align: center;
+        min-width: 70px;
+    }
+
+    .wb-stat-n {
+        color: #fff;
+        font-size: 24px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: 0;
+    }
+
+    .wb-stat-l {
+        color: #5a90d0;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        margin-top: 7px;
+    }
+
+    .wb-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 15px;
+        font-weight: 800;
+        white-space: nowrap;
+        border: 1px solid rgba(251, 191, 36, 0.18);
+    }
+
+    .pill-warn { background: rgba(255, 255, 255, 0.10); color: #fbbf24; }
+    .pill-ok   { background: rgba(255, 255, 255, 0.10); color: #4ade80; border-color: rgba(74, 222, 128, 0.18); }
+
+    .wb-pill .icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .wb-btn {
+        background: transparent;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 0;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+    .wb-btn:hover { color: #fff; }
+
+    .wb-btn .icon {
+        width: 18px;
+        height: 18px;
+        stroke-width: 2.2;
+    }
+
+    .attention-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .attention-card {
+        min-height: 86px;
+        padding: 16px 18px;
+        border-radius: 8px;
+        background: #ffffff;
+        border: 1px solid rgba(121, 144, 182, 0.18);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        color: #10213d;
+        text-decoration: none;
+    }
+
+    .attention-card:hover {
+        border-color: rgba(37, 99, 235, 0.36);
+        transform: translateY(-1px);
+    }
+
+    .attention-card span {
+        display: block;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0;
+    }
+
+    .attention-card strong {
+        display: block;
+        margin-top: 5px;
+        font-size: 22px;
+        line-height: 1;
+    }
+
+    .attention-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+    }
+
+    .attention-icon .icon {
+        width: 21px;
+        height: 21px;
+    }
+
+    .attention-due .attention-icon { background: #fff7ed; color: #c2410c; }
+    .attention-overdue .attention-icon { background: #fee2e2; color: #b91c1c; }
+    .attention-maintenance .attention-icon { background: #e0e7ff; color: #3730a3; }
+
+    @media (max-width: 768px) {
+        .wb-banner {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 22px;
+            gap: 22px;
+        }
+        .wb-right {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 14px;
+        }
+        .wb-focus { width: 100%; max-width: none; min-width: 0; }
+        .wb-focus-top { flex-direction: column; }
+        .wb-sep { display: none; }
+        .wb-stat { min-width: 64px; }
+        .wb-name { font-size: 18px; }
+    }
+</style>
+
+<!-- ── WELCOME BANNER ── -->
+<div class="wb-banner">
+
+    <!-- background geometry -->
+    <svg class="wb-geo" viewBox="0 0 900 80" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="780" cy="-20" r="140" fill="none" stroke="rgba(37,99,235,0.15)" stroke-width="1"/>
+        <circle cx="780" cy="-20" r="90"  fill="none" stroke="rgba(37,99,235,0.10)" stroke-width="1"/>
+        <circle cx="780" cy="-20" r="180" fill="rgba(34,211,238,0.03)"/>
+        <circle cx="860" cy="70"  r="4"   fill="rgba(34,211,238,0.18)"/>
+        <circle cx="830" cy="12"  r="2"   fill="rgba(96,165,250,0.20)"/>
+        <line x1="560" y1="0" x2="900" y2="80" stroke="rgba(96,165,250,0.05)" stroke-width="1"/>
+        <line x1="610" y1="0" x2="900" y2="60" stroke="rgba(96,165,250,0.03)" stroke-width="1"/>
+    </svg>
+
+    <!-- left: avatar + name -->
+    <div class="wb-left">
+        <div class="wb-avatar">
+            {% if request.user.is_authenticated %}
+                {% if request.user.get_full_name %}
+                    {{ request.user.get_full_name|slice:":2" }}
+                {% else %}
+                    {{ request.user.username|slice:":2" }}
+                {% endif %}
+            {% else %}
+                AD
+            {% endif %}
+        </div>
+        <div>
+            <div class="wb-name">
+                Welcome back,
+                {% if request.user.is_authenticated %}
+                    {% if request.user.get_full_name %}
+                        {{ request.user.get_full_name }}
+                    {% else %}
+                        {{ request.user.username }}
+                    {% endif %}
+                {% else %}
+                    Admin
+                {% endif %}
+            </div>
+            <div class="wb-sub">
+                <div class="wb-live"></div>
+                {% if request.user.is_authenticated %}
+                    {{ request.user.profile.role }} Panel
+                {% else %}
+                    System Panel
+                {% endif %}
+                <span aria-hidden="true">&middot;</span>
+                <span id="wb-date"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="wb-right">
+        <div class="wb-focus">
+            <div class="wb-focus-top">
+                <div>
+                    <div class="wb-focus-title">Today focus</div>
+                    <div class="wb-focus-text">
+                        {% if due_today_count or overdue_items %}
+                            Review pending returns before starting new borrow transactions.
+                        {% else %}
+                            Queues are clear. You can prepare labels or check public inventory pages.
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="wb-focus-badge {% if due_today_count or overdue_items %}warning{% endif %}">
+                    <svg class="icon"><use href="{% if due_today_count or overdue_items %}#icon-alert{% else %}#icon-calendar{% endif %}"></use></svg>
+                    {% if overdue_items %}
+                        {{ overdue_items }} overdue
+                    {% elif due_today_count %}
+                        {{ due_today_count }} due today
+                    {% else %}
+                        Clear
+                    {% endif %}
+                </div>
+            </div>
+            <div class="wb-focus-actions">
+                <a href="{% url 'return_list' %}" class="wb-focus-action">
+                    <svg class="icon"><use href="#icon-return"></use></svg>
+                    Return queue
+                </a>
+                <a href="{% url 'item_qr_labels' %}" class="wb-focus-action">
+                    <svg class="icon"><use href="#icon-receipt"></use></svg>
+                    QR labels
+                </a>
+                <a href="{% url 'public_item_availability' %}" class="wb-focus-action" target="_blank" rel="noopener">
+                    <svg class="icon"><use href="#icon-eye"></use></svg>
+                    Public view
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="attention-grid" aria-label="Attention queue">
+    <a href="{% url 'return_list' %}?status=Borrowed" class="attention-card attention-due">
+        <div>
+            <span>Due Today</span>
+            <strong>{{ due_today_count }} transaction{{ due_today_count|pluralize }}</strong>
+        </div>
+        <div class="attention-icon"><svg class="icon"><use href="#icon-calendar"></use></svg></div>
+    </a>
+    <a href="{% url 'return_list' %}?status=Overdue" class="attention-card attention-overdue">
+        <div>
+            <span>Overdue Queue</span>
+            <strong>{{ overdue_items }} item{{ overdue_items|pluralize }}</strong>
+        </div>
+        <div class="attention-icon"><svg class="icon"><use href="#icon-alert"></use></svg></div>
+    </a>
+    <a href="{% url 'maintenance_list' %}" class="attention-card attention-maintenance">
+        <div>
+            <span>Maintenance</span>
+            <strong>{{ maintenance_items }} item{{ maintenance_items|pluralize }}</strong>
+        </div>
+        <div class="attention-icon"><svg class="icon"><use href="#icon-wrench"></use></svg></div>
+    </a>
+</div>
+
+
+<!-- ── STAT CARDS ── -->
+<div class="cards">
+    <div class="card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-users"></use></svg></div>
+        <div class="label">Total Borrowers</div>
+        <div class="value">{{ total_borrowers }}</div>
+        <div class="line blue"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-box"></use></svg></div>
+        <div class="label">Total Items</div>
+        <div class="value">{{ total_items }}</div>
+        <div class="line green"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-repeat"></use></svg></div>
+        <div class="label">Borrowed Items</div>
+        <div class="value">{{ borrowed_items }}</div>
+        <div class="line orange"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-return"></use></svg></div>
+        <div class="label">Returned Items</div>
+        <div class="value">{{ returned_items }}</div>
+        <div class="line purple"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-alert"></use></svg></div>
+        <div class="label">Overdue Items</div>
+        <div class="value">{{ overdue_items }}</div>
+        <div class="line red"></div>
+    </div>
+</div>
+
+
+<!-- ── INSIGHT PANELS ── -->
+<div class="insight-grid">
+    <div class="panel">
+        <h3><svg class="icon"><use href="#icon-calendar"></use></svg> Due Today</h3>
+        <div class="panel-subtext">Priority transactions that need attention before they become overdue.</div>
+        <div class="list-stack" style="margin-top: 16px;">
+            {% for transaction in due_today_items %}
+                <div class="list-row">
+                    <div>
+                        <strong>{{ transaction.item.item_name }}</strong>
+                        <div class="muted">{{ transaction.borrower.full_name }} | due {{ transaction.due_time }}</div>
+                    </div>
+                    <span class="status-badge {% if transaction.status == 'Overdue' %}status-overdue{% else %}status-borrowed{% endif %}">
+                        {{ transaction.status }}
+                    </span>
+                </div>
+            {% empty %}
+                <div class="empty-state">Nothing is due today. The queue is currently under control.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3><svg class="icon"><use href="#icon-chart"></use></svg> Borrowing Trends</h3>
+        <div class="panel-subtext">A quick view of the categories and items driving system activity.</div>
+        <div class="mini-chart" style="margin-top: 16px;">
+            {% for entry in category_usage %}
+                <div class="chart-row">
+                    <div>{{ entry.label }}</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: {{ entry.width }}%;"></div></div>
+                    <strong>{{ entry.count }}</strong>
+                </div>
+            {% empty %}
+                <div class="empty-state">Borrow a few items to start seeing category trends.</div>
+            {% endfor %}
+        </div>
+        <div class="panel-subtext" style="margin-top: 16px;">Most borrowed items</div>
+        <div class="mini-chart" style="margin-top: 12px;">
+            {% for entry in top_items %}
+                <div class="chart-row">
+                    <div>{{ entry.label }}</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: {{ entry.width }}%;"></div></div>
+                    <strong>{{ entry.count }}</strong>
+                </div>
+            {% empty %}
+                <div class="empty-state">No borrowing data yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3><svg class="icon"><use href="#icon-list"></use></svg> Recent Transactions</h3>
+        <div class="panel-subtext">Latest borrow and return activity across the system.</div>
+        <div class="list-stack" style="margin-top: 16px;">
+            {% for transaction in recent_transactions %}
+                <div class="list-row">
+                    <div>
+                        <strong>{{ transaction.item.item_name }}</strong>
+                        <div class="muted">{{ transaction.borrower.full_name }} | {{ transaction.borrow_time }}</div>
+                    </div>
+                    <span class="status-badge {% if transaction.status == 'Returned' %}status-returned{% elif transaction.status == 'Overdue' %}status-overdue{% else %}status-borrowed{% endif %}">
+                        {{ transaction.status }}
+                    </span>
+                </div>
+            {% empty %}
+                <div class="empty-state">No transactions yet. Start by borrowing an item.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3><svg class="icon"><use href="#icon-activity"></use></svg> Recent Activity</h3>
+        <div class="panel-subtext">Latest system actions from staff and admin users.</div>
+        <div class="list-stack" style="margin-top: 16px;">
+            {% for log in recent_logs %}
+                <div class="list-row">
+                    <div>
+                        <strong>{{ log.action }}</strong>
+                        <div class="muted">{{ log.description }}</div>
+                    </div>
+                    <div class="muted">{{ log.timestamp }}</div>
+                </div>
+            {% empty %}
+                <div class="empty-state">Activity will appear here as the system is used.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if request.user.is_authenticated and request.user.profile.role == 'Admin' %}
+    <div class="panel">
+        <h3><svg class="icon"><use href="#icon-settings"></use></svg> Admin Readiness</h3>
+        <div class="panel-subtext">Fast checks before demos, GitHub updates, or production configuration work.</div>
+        <div class="list-stack" style="margin-top: 16px;">
+            <div class="list-row">
+                <div>
+                    <strong>Failed Notifications</strong>
+                    <div class="muted">Review email and Telegram delivery issues.</div>
+                </div>
+                <a href="{% url 'notification_list' %}?status=Failed" class="status-badge {% if failed_notification_count %}status-overdue{% else %}status-available{% endif %}">
+                    {{ failed_notification_count }}
+                </a>
+            </div>
+            <div class="list-row">
+                <div>
+                    <strong>Latest Backup</strong>
+                    <div class="muted">
+                        {% if latest_backup %}
+                            {{ latest_backup.name }} | {{ latest_backup.created_at }}
+                        {% else %}
+                            No backup has been created yet.
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'system_settings' %}#backups" class="status-badge status-info">Backups</a>
+            </div>
+            <div class="list-row">
+                <div>
+                    <strong>Maintenance Items</strong>
+                    <div class="muted">Items that may need staff follow-up before borrowing.</div>
+                </div>
+                <a href="{% url 'maintenance_list' %}" class="status-badge {% if maintenance_items %}status-maintenance{% else %}status-available{% endif %}">
+                    {{ maintenance_items }}
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    (function () {
+        var d = new Date();
+        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        document.getElementById('wb-date').textContent =
+            days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ' ' + d.getFullYear();
+    })();
+</script>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Page Not Found{% endblock %}
+{% block header %}Page Not Found{% endblock %}
+{% block topbar_subtext %}The page you requested could not be found.{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Page not found</h2>
+    <p class="page-subtext" style="margin: 10px 0 20px;">
+        The link may be outdated, or the record may have been moved.
+    </p>
+    <a href="{% url 'dashboard' %}" class="btn">Back to Dashboard</a>
+</div>
+{% endblock %}

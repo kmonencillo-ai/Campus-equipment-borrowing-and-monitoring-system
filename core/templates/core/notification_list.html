@@ -1,0 +1,130 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Notifications{% endblock %}
+{% block header %}Notification Center{% endblock %}
+{% block breadcrumb_current %}Notifications{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2><svg class="icon"><use href="#icon-alert"></use></svg> Notification Center</h2>
+        <div class="page-subtext">Review sent, skipped, and failed email or Telegram events before running reminder checks.</div>
+    </div>
+    <form method="POST" action="{% url 'run_notification_check' %}" class="quick-actions">
+        {% csrf_token %}
+        <label class="checkbox-line" style="margin-right: 10px;">
+            <input type="checkbox" name="dry_run">
+            Dry run
+        </label>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-calendar"></use></svg>Run Reminder Check</button>
+    </form>
+</div>
+
+<div class="cards">
+    <div class="card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-calendar"></use></svg></div>
+        <div class="label">Due Soon</div>
+        <div class="value">{{ notification_readiness.due_soon_count }}</div>
+        <div class="line blue"></div>
+    </div>
+    <div class="card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-alert"></use></svg></div>
+        <div class="label">Due Today</div>
+        <div class="value">{{ notification_readiness.due_today_count }}</div>
+        <div class="line orange"></div>
+    </div>
+    <div class="card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-return"></use></svg></div>
+        <div class="label">Overdue</div>
+        <div class="value">{{ notification_readiness.overdue_count }}</div>
+        <div class="line red"></div>
+    </div>
+    <div class="card">
+        <div class="card-icon"><svg class="icon icon-lg"><use href="#icon-list"></use></svg></div>
+        <div class="label">Failed Logs</div>
+        <div class="value">{{ notification_summary.failed }}</div>
+        <div class="line purple"></div>
+    </div>
+</div>
+
+<form method="GET" class="filter-form">
+    <div class="form-group">
+        <label for="search">Search Logs</label>
+        <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="Recipient, message, item, borrower, or error">
+    </div>
+    <div class="form-group">
+        <label for="channel">Channel</label>
+        <select name="channel" id="channel">
+            <option value="">All Channels</option>
+            <option value="Email" {% if selected_channel == 'Email' %}selected{% endif %}>Email</option>
+            <option value="Telegram" {% if selected_channel == 'Telegram' %}selected{% endif %}>Telegram</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select name="status" id="status">
+            <option value="">All Statuses</option>
+            <option value="Sent" {% if selected_status == 'Sent' %}selected{% endif %}>Sent</option>
+            <option value="Failed" {% if selected_status == 'Failed' %}selected{% endif %}>Failed</option>
+            <option value="Skipped" {% if selected_status == 'Skipped' %}selected{% endif %}>Skipped</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="event_type">Event</label>
+        <select name="event_type" id="event_type">
+            <option value="">All Events</option>
+            {% for type in event_types %}
+                <option value="{{ type }}" {% if selected_event_type == type %}selected{% endif %}>{{ type }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <span class="form-spacer" aria-hidden="true"></span>
+        <button type="submit" class="btn"><svg class="icon"><use href="#icon-search"></use></svg>Filter</button>
+        <a href="{% url 'notification_list' %}" class="btn btn-secondary" style="margin-left: 8px;">Clear</a>
+    </div>
+</form>
+
+<div class="table-container">
+    <div class="table-meta">
+        <div class="muted">{{ log_total }} notification log{{ log_total|pluralize }} found</div>
+        <div class="muted">
+            Last notification:
+            {% if notification_readiness.last_notification_at %}{{ notification_readiness.last_notification_at }}{% else %}None yet{% endif %}
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Created</th>
+                <th scope="col">Channel</th>
+                <th scope="col">Event</th>
+                <th scope="col">Recipient</th>
+                <th scope="col">Status</th>
+                <th scope="col">Error</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+                <tr class="{% if log.status == 'Failed' %}overdue-row{% endif %}">
+                    <td>{{ log.created_at }}</td>
+                    <td>{{ log.channel }}</td>
+                    <td>{{ log.event_type }}</td>
+                    <td>{{ log.recipient|default:"-" }}</td>
+                    <td>
+                        <span class="status-badge {% if log.status == 'Sent' %}status-available{% elif log.status == 'Skipped' %}status-info{% else %}status-overdue{% endif %}">
+                            {{ log.status }}
+                        </span>
+                    </td>
+                    <td>{{ log.error_message|default:"-" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6"><div class="empty-state">No notification logs matched your filters.</div></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'core/pagination.html' with page_obj=logs querystring=querystring %}
+</div>
+{% endblock %}
