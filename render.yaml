@@ -1,9 +1,3 @@
-databases:
-  - name: campus-equipment-db
-    plan: free
-    databaseName: campus_equipment
-    user: campus_equipment
-
 services:
   - type: web
     name: campus-equipment-system
@@ -12,10 +6,8 @@ services:
     buildCommand: ./build.sh
     startCommand: python -m gunicorn myproject.wsgi:application
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: campus-equipment-db
-          property: connectionString
+      - key: SUPABASE_DATABASE_URL
+        sync: false
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DJANGO_DEBUG
