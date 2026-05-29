@@ -96,7 +96,7 @@ def supabase_config_from_url(supabase_url):
 
 
 # ─── Core settings ────────────────────────────────────────────────────────────
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-in-production')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY') or os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production')
 
 DEBUG = env_bool('DJANGO_DEBUG', True)
 
@@ -122,6 +122,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'core.middleware.SecurityHeadersMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -154,7 +155,7 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
 # ─── Database ─────────────────────────────────────────────────────────────────
-SUPABASE_DATABASE_URL = os.getenv('SUPABASE_DATABASE_URL', '').strip()
+SUPABASE_DATABASE_URL = (os.getenv('SUPABASE_DATABASE_URL') or os.getenv('DATABASE_URL', '')).strip()
 
 if SUPABASE_DATABASE_URL:
     DATABASES = {
@@ -190,6 +191,14 @@ USE_TZ = True
 # ─── Static files ─────────────────────────────────────────────────────────────
 STATIC_URL = os.getenv('DJANGO_STATIC_URL', '/static/')
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 BACKUP_DIR = Path(os.getenv('DJANGO_BACKUP_DIR', str(BASE_DIR / 'backups')))
 if not BACKUP_DIR.is_absolute():
     BACKUP_DIR = BASE_DIR / BACKUP_DIR
