@@ -18,12 +18,14 @@
             background:
                 linear-gradient(180deg, rgba(255,255,255,0.72) 0, rgba(255,255,255,0) 42px),
                 radial-gradient(circle at 50% -20%, rgba(79, 140, 255, 0.34), transparent 38%),
-                linear-gradient(180deg, #0f2d5a 0%, #12386f 100%);
+                linear-gradient(135deg, #0a1d3d 0%, #0f2d5a 42%, #12386f 72%, #07162d 100%);
+            background-size: 100% 100%, 100% 100%, 180% 180%;
             display: grid;
             place-items: center;
             padding: 6px;
             position: relative;
             overflow-x: hidden;
+            animation: loginSkyShift 16s ease-in-out infinite alternate;
         }
 
         body::before {
@@ -31,10 +33,31 @@
             position: fixed;
             inset: 0;
             background:
-                linear-gradient(115deg, transparent 0 28%, rgba(255,255,255,0.06) 28% 31%, transparent 31% 100%),
+                radial-gradient(circle at 18% 24%, rgba(96, 165, 250, 0.22) 0 0.55rem, transparent 0.6rem),
+                radial-gradient(circle at 82% 18%, rgba(42, 196, 220, 0.20) 0 0.42rem, transparent 0.48rem),
+                radial-gradient(circle at 72% 76%, rgba(51, 120, 255, 0.18) 0 0.7rem, transparent 0.78rem),
+                radial-gradient(circle at 28% 84%, rgba(142, 197, 255, 0.16) 0 0.38rem, transparent 0.44rem),
                 linear-gradient(180deg, rgba(7, 13, 28, 0.08), rgba(15, 45, 90, 0.18));
+            background-size: 340px 340px, 420px 420px, 520px 520px, 390px 390px, 100% 100%;
+            background-position: 0 0, 120px 42px, -80px 110px, 60px -90px, 0 0;
             pointer-events: none;
-            animation: lightSweep 9s ease-in-out infinite;
+            animation: loginCircleDrift 20s linear infinite, lightSweep 9s ease-in-out infinite;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: -20%;
+            background:
+                radial-gradient(circle at 18% 22%, rgba(47, 109, 242, 0.20) 0 4.6rem, transparent 4.8rem),
+                radial-gradient(circle at 76% 26%, rgba(42, 196, 220, 0.15) 0 6.2rem, transparent 6.45rem),
+                radial-gradient(circle at 42% 76%, rgba(142, 197, 255, 0.12) 0 5.1rem, transparent 5.35rem),
+                radial-gradient(circle at 86% 84%, rgba(47, 109, 242, 0.14) 0 3.7rem, transparent 3.95rem);
+            filter: blur(2px);
+            opacity: 0.92;
+            pointer-events: none;
+            transform: translate3d(0, 0, 0);
+            animation: loginBubbleFloat 24s ease-in-out infinite alternate;
         }
 
         .auth-shell {
@@ -468,6 +491,21 @@
         @keyframes lightSweep {
             0%, 100% { opacity: 0.70; }
             50% { opacity: 1; }
+        }
+
+        @keyframes loginSkyShift {
+            from { background-position: 0 0, 0 0, 0% 50%; }
+            to { background-position: 0 0, 0 0, 100% 50%; }
+        }
+
+        @keyframes loginCircleDrift {
+            from { background-position: 0 0, 120px 42px, -80px 110px, 60px -90px, 0 0; }
+            to { background-position: 140px 92px, 0 150px, 80px -20px, -70px 80px, 0 0; }
+        }
+
+        @keyframes loginBubbleFloat {
+            from { transform: translate3d(-2%, -1.5%, 0) scale(1); }
+            to { transform: translate3d(2.5%, 2%, 0) scale(1.04); }
         }
 
         @keyframes backgroundDrift {

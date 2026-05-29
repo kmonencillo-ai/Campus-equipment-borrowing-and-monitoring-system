@@ -77,3 +77,12 @@ This plan maps the MVP and UI checklist documents into work that fits the curren
 - Added public item detail pages that show live availability and are ready to be used as QR label targets.
 - Added QR Page links from the staff item list and public item availability cards.
 - Added a Borrower Lookup link to the public equipment availability page.
+
+## Phase 11 - Manual / Semi-Automatic Run Flow - Implemented
+
+- Upgraded `Start Shared System.bat` into the main one-click shared starter.
+- Enhanced `run_lan_server.ps1` to choose the next free port from `8000` to `8010` when the default port is busy.
+- Added automatic Edge/Chrome opening for the local computer while still printing LAN links for other devices.
+- Printed clear same-Wi-Fi URLs, backup IP URLs, and a warning not to browse to `0.0.0.0`.
+- Forced local shared mode to allow LAN hosts for the starter process.
+- Documented the new run flow and the optional `-NoBrowser` mode in the README.

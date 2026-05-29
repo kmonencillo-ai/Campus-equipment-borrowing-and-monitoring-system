@@ -27,6 +27,8 @@ cd C:\Users\juneh\Documents\SDPROJECT\myproject\myproject
 ..\..\venv\Scripts\python.exe manage.py runserver
 ```
 
+`manage.py` auto-relaunches into the project virtual environment when it is started with the global `python` command. This prevents missing Supabase driver errors such as `No module named psycopg`.
+
 Open:
 
 ```text
@@ -42,6 +44,20 @@ Run:
 ```
 
 The script prints the preferred local network URL and backup IP URL. Keep the terminal window open while other devices use the system.
+
+Phase 11 improved this shared starter:
+
+- double-click `Start Shared System.bat` to run the system
+- the script opens Edge/Chrome automatically on this computer
+- if port `8000` is busy, it uses the next free port up to `8010`
+- it prints the exact same-Wi-Fi links for phones, tablets, and other laptops
+- it reminds you not to open `0.0.0.0` directly because that is only the bind address
+
+To run without opening a browser:
+
+```powershell
+.\run_lan_server.ps1 -NoBrowser
+```
 
 ## Environment Variables
 

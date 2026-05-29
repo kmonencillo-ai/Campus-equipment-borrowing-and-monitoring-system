@@ -880,6 +880,7 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 700;
+            line-height: 1.2;
             transition: 0.22s ease;
             box-shadow: 0 8px 18px rgba(17, 79, 214, 0.14);
         }
@@ -1249,9 +1250,41 @@
 
         .filter-form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
             gap: 16px;
+            align-items: end;
             margin-bottom: 22px;
+        }
+
+        .filter-form .form-group {
+            min-width: 0;
+            margin-bottom: 0;
+        }
+
+        .filter-form input,
+        .filter-form select {
+            min-width: 0;
+        }
+
+        .filter-form .form-group:has(.form-spacer) {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            grid-column: span 2;
+            min-width: min(100%, 320px);
+        }
+
+        .filter-form .form-group:has(.form-spacer) .form-spacer {
+            display: none;
+        }
+
+        .filter-form .form-group:has(.form-spacer) .btn {
+            min-width: max-content;
+            white-space: nowrap;
+        }
+
+        .filter-form .form-group:has(.form-spacer) .btn + .btn {
+            margin-left: 0 !important;
         }
 
         .errorlist {
@@ -1679,6 +1712,16 @@
             .form-action-bar {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .filter-form .form-group:has(.form-spacer) {
+                grid-column: 1 / -1;
+                min-width: 0;
+                width: 100%;
+            }
+
+            .filter-form .form-group:has(.form-spacer) .btn {
+                flex: 1 1 150px;
             }
 
             .form-action-bar .btn {
